@@ -16,15 +16,28 @@ namespace Graph_algorithms
             render = new Render(ref graphics);
         }
         Render render;
+        private static int x1, y1;
+        private static bool switcher = false;
 
         private void bClose_Click(object sender, EventArgs e)
         {
             Close();
         }
 
-        private void button1_Click(object sender, EventArgs e)
+        private void graphics_MouseClick(object sender, MouseEventArgs e)
         {
-            render.drawCircle(0, 0);
+            //render.drawText("123", e.X, e.Y);
+            if (!switcher)
+            {
+                x1 = e.X;
+                y1 = e.Y;
+                switcher = true;
+            }
+            else
+            {
+                render.drawArc(x1, y1, e.X, e.Y);
+                switcher = false;
+            }
         }
     }
 }

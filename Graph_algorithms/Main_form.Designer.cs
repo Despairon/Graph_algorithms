@@ -45,7 +45,6 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.bEdm_Carp_Alg = new System.Windows.Forms.Button();
             this.bFord_Falks_Alg = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -69,6 +68,7 @@
             this.graphics.Size = new System.Drawing.Size(818, 400);
             this.graphics.StencilBits = ((byte)(0));
             this.graphics.TabIndex = 0;
+            this.graphics.MouseClick += new System.Windows.Forms.MouseEventHandler(this.graphics_MouseClick);
             // 
             // bClose
             // 
@@ -225,22 +225,11 @@
             this.bFord_Falks_Alg.Text = "Алгоритм Форда-Фалкерсона";
             this.bFord_Falks_Alg.UseVisualStyleBackColor = true;
             // 
-            // button1
-            // 
-            this.button1.Location = new System.Drawing.Point(293, 573);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 7;
-            this.button1.Text = "test";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // Main_form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(843, 608);
-            this.Controls.Add(this.button1);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.groupBox3);
             this.Controls.Add(this.groupBox2);
@@ -277,7 +266,6 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button bEdm_Carp_Alg;
         private System.Windows.Forms.Button bFord_Falks_Alg;
-        private System.Windows.Forms.Button button1;
     }
 }
 
