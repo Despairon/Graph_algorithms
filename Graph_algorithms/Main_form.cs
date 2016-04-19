@@ -30,23 +30,37 @@ namespace Graph_algorithms
             render.drawAll();
         }
 
+        private void bClear_Click(object sender, EventArgs e)
+        {
+            render.clearAll();
+            switcher = false;
+        }
+
         private void graphics_MouseClick(object sender, MouseEventArgs e)
         {
-            if (!switcher)
+            if (render.checkBoundsEnter(new Point(e.X, e.Y)))
             {
-                render.circles.Add(new Point(e.X, e.Y));
-                render.texts.Add(new Render.Text(e.X, e.Y));
-                x1 = e.X;
-                y1 = e.Y;
-                switcher = true;
+                render.clearAllHighlights();
+                render.geometrics.Add(Render.highlightedCircle);
             }
             else
-            {
-                render.circles.Add(new Point(e.X, e.Y));
-                render.texts.Add(new Render.Text(e.X, e.Y));
-                render.arcs.Add(new Render.Arc(x1, y1, e.X, e.Y));
-                switcher = false;
-            }
+                if (!switcher)
+                {
+                    Rectangle bounds = new Rectangle(e.X - 15, e.Y - 15, 30, 30);
+                    render.geometrics.Add(new Render.Circle(e.X, e.Y, bounds));
+                    render.geometrics.Add(new Render.Text(e.X, e.Y));
+                    x1 = e.X;
+                    y1 = e.Y;
+                    switcher = true;
+                }
+                else
+                {
+                    Rectangle bounds = new Rectangle(e.X - 15, e.Y - 15, 30, 30);
+                    render.geometrics.Add(new Render.Circle(e.X, e.Y, bounds));
+                    render.geometrics.Add(new Render.Text(e.X, e.Y));
+                    render.geometrics.Add(new Render.Arc(x1, y1, e.X, e.Y));
+                    switcher = false;
+                }
         }
     }
 }

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using Tao.OpenGl;
 using Tao.FreeGlut;
 using Tao.Platform.Windows;
-using System.Windows.Forms;
 using System.Drawing;
 
 namespace Graph_algorithms
@@ -27,106 +25,169 @@ namespace Graph_algorithms
             Gl.glEnable(Gl.GL_DEPTH_TEST);
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
 
-            circles = new List<Point>();
-            highlights = new List<Point>();
-            texts = new List<Text>();
-            arcs = new List<Arc>();
+            geometrics = new List<Shape>();
         }
+        private SimpleOpenGlControl graphics;
+        public List<Shape> geometrics;
+        public static Highlight highlightedCircle { get; private set; }
 
-        public struct Arc
+        public class Shape
         {
-            public int x1, y1, x2, y2;
-            public Arc(int x1,int y1,int x2,int y2)
-            {
-                this.x1 = x1;
-                this.x2 = x2;
-                this.y1 = y1;
-                this.y2 = y2;
-            }
-        }
-
-        public struct Text
-        {
-            private static int i = 1;
-            public string text;
-            public int x, y;
-            public Text(int x, int y)
+            public Shape (int x, int y)
             {
                 this.x = x;
                 this.y = y;
+            }
+            public int x { get;}
+            public int y { get;}
+        }
+
+        public class Arc : Shape
+        {
+            public Arc(int x, int y, int x1, int y1) : base(x,y)
+            {
+                this.x1 = x1;
+                this.y1 = y1;
+            }
+            public int x1 { get;}
+            public int y1 { get;}
+        }
+
+        public class Text : Shape
+        {
+            public Text(int x, int y) : base(x,y)
+            {
                 text = i.ToString();
                 i++;
             }
-        }
+            public string text { get;}
+            private static int i = 1;
 
-        private SimpleOpenGlControl graphics;
-        public List<Point> circles { get; private set; }
-        public List<Point> highlights { get; private set; }
-        public List<Arc> arcs { get; private set; }
-        public List<Text> texts { get; private set; }
-
-        private void drawCircle(Point c)
-        {
-            const int R = 15;
-            const int SEGMENTS = 100;
-            const float PI = 3.1415926f;
-            Gl.glLoadIdentity();
-            Gl.glColor3f(0.0f, 0.0f, 0.0f);
-            Gl.glBegin(Gl.GL_TRIANGLE_FAN);
-            Gl.glVertex2d(c.X, c.Y);
-            for (int i = 0; i <= SEGMENTS; i++)
+            public static void clear()
             {
-                float a = (float)i / (float)SEGMENTS * PI * 2.0f;
-                float x = (float)(R * Math.Cos(a));
-                float y = (float)(R * Math.Sin(a));
-                Gl.glVertex2d(x+c.X, y+c.Y);
+                i = 1;
+            } 
+        }
+
+        public class Circle : Shape
+        {
+            public Circle(int x, int y, Rectangle bounds) : base(x,y)
+            {
+                this.bounds = bounds;
             }
-            Gl.glEnd();
+            public Rectangle bounds { get;}
         }
 
-        private void drawArc(Arc arc)
+        public class Highlight : Shape
         {
-            Gl.glLoadIdentity();
-            Gl.glBegin(Gl.GL_LINES);
-            Gl.glPushMatrix();
-            Gl.glTranslated(0,0,-1);
-            Gl.glColor3f(0.0f, 0.0f, 0.0f);
-            Gl.glVertex2d(arc.x1, arc.y1);
-            Gl.glVertex2d(arc.x2, arc.y2);
-            Gl.glPopMatrix();
-            Gl.glEnd();
+            public Highlight(int x, int y) : base (x,y)
+            {
+            }
         }
 
-        private void drawText(Text txt)
+        private void drawShape(Shape shape)
         {
-            Gl.glLoadIdentity();
-            Gl.glPushMatrix();
-            Gl.glTranslated(0, 0, 1);
-            Gl.glColor3f(0.0f, 1.0f, 0.0f);
-            Gl.glRasterPos2d(txt.x-5,txt.y+5);
-            Glut.glutBitmapString(Glut.GLUT_BITMAP_9_BY_15, txt.text);
-            Gl.glPopMatrix();
+            if (shape is Circle)
+            {
+                const int R = 15;
+                const int SEGMENTS = 100;
+                const float PI = 3.1415926f;
+                Gl.glLoadIdentity();
+                Gl.glColor3f(0.0f, 0.0f, 0.0f);
+                Gl.glBegin(Gl.GL_TRIANGLE_FAN);
+                Gl.glVertex2d(shape.x, shape.y);
+                for (int i = 0; i <= SEGMENTS; i++)
+                {
+                    float a = (float)i / (float)SEGMENTS * PI * 2.0f;
+                    float x = (float)(R * Math.Cos(a));
+                    float y = (float)(R * Math.Sin(a));
+                    Gl.glVertex2d(x + shape.x, y + shape.y);
+                }
+                Gl.glEnd();
+            }
+
+            if (shape is Arc)
+            {
+                Gl.glLoadIdentity();
+                Gl.glBegin(Gl.GL_LINES);
+                Gl.glPushMatrix();
+                Gl.glTranslated(0, 0, -1);
+                Gl.glColor3f(0.0f, 0.0f, 0.0f);
+                Gl.glVertex2d(shape.x, shape.y);
+                Gl.glVertex2d((shape as Arc).x1, (shape as Arc).y1);
+                Gl.glPopMatrix();
+                Gl.glEnd();
+            }
+
+            if (shape is Text)
+            {
+                Gl.glLoadIdentity();
+                Gl.glPushMatrix();
+                Gl.glTranslated(0, 0, 1);
+                Gl.glColor3f(0.0f, 1.0f, 0.0f);
+                Gl.glRasterPos2d(shape.x - 5, shape.y + 5);
+                Glut.glutBitmapString(Glut.GLUT_BITMAP_9_BY_15, (shape as Text).text);
+                Gl.glPopMatrix();
+            }
+
+            if (shape is Highlight)
+            {
+                const int R = 20;
+                const int SEGMENTS = 100;
+                const float PI = 3.1415926f;
+                Gl.glLoadIdentity();
+                Gl.glColor3f(1.0f, 0.0f, 0.0f);
+                Gl.glBegin(Gl.GL_TRIANGLE_FAN);
+                Gl.glVertex2d(shape.x, shape.y);
+                for (int i = 0; i <= SEGMENTS; i++)
+                {
+                    float a = (float)i / (float)SEGMENTS * PI * 2.0f;
+                    float x = (float)(R * Math.Cos(a));
+                    float y = (float)(R * Math.Sin(a));
+                    Gl.glVertex2d(x + shape.x, y + shape.y);
+                }
+                Gl.glEnd();
+            }
         }
 
-        private void highlight(Point point)
+        public bool checkBoundsEnter(Point pt)
         {
-            Gl.glLoadIdentity();
-            Gl.glColor3f(1.0f, 0, 0);
-            
+            foreach (Shape shape in geometrics)
+                if (shape is Circle)
+                    if ((pt.X >= (shape as Circle).bounds.Left && pt.X <= (shape as Circle).bounds.Right)
+                     && (pt.Y >= (shape as Circle).bounds.Top && pt.Y <= (shape as Circle).bounds.Bottom))
+                    {
+                        highlightedCircle = new Highlight(shape.x, shape.y);
+                        return true;
+                    }
+            return false;
+        }
+
+        public void clearAllHighlights()
+        {
+            for (int i = 0; i < geometrics.Count; i++)
+            {
+                if (geometrics[i] is Highlight)
+                {
+                    geometrics.RemoveAt(i);
+                    i--;
+
+                }
+            }
+        }
+
+        public void clearAll()
+        {
+            geometrics.Clear();
+            Text.clear();
         }
 
         public void drawAll()
         {
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
 
-            foreach (Point circle in circles)
-                drawCircle(circle);
-            foreach (Arc arc in arcs)
-                drawArc(arc);
-            foreach (Text txt in texts)
-                drawText(txt);
-            foreach (Point hl in highlights)
-                highlight(hl);
+            foreach (Shape shape in geometrics)
+                drawShape(shape);
 
             Gl.glFlush();
             graphics.Invalidate();

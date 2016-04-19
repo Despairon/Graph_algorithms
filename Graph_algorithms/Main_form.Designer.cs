@@ -90,6 +90,7 @@
             this.bClear.TabIndex = 2;
             this.bClear.Text = "Очистити";
             this.bClear.UseVisualStyleBackColor = true;
+            this.bClear.Click += new System.EventHandler(this.bClear_Click);
             // 
             // groupBox1
             // 
