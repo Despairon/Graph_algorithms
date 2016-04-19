@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.graphics = new Tao.Platform.Windows.SimpleOpenGlControl();
             this.bClose = new System.Windows.Forms.Button();
             this.bClear = new System.Windows.Forms.Button();
@@ -45,6 +46,7 @@
             this.groupBox4 = new System.Windows.Forms.GroupBox();
             this.bEdm_Carp_Alg = new System.Windows.Forms.Button();
             this.bFord_Falks_Alg = new System.Windows.Forms.Button();
+            this.tDrawing = new System.Windows.Forms.Timer(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
@@ -62,7 +64,7 @@
             this.graphics.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.graphics.ColorBits = ((byte)(32));
             this.graphics.DepthBits = ((byte)(16));
-            this.graphics.ForeColor = System.Drawing.Color.White;
+            this.graphics.ForeColor = System.Drawing.Color.Transparent;
             this.graphics.Location = new System.Drawing.Point(13, 167);
             this.graphics.Name = "graphics";
             this.graphics.Size = new System.Drawing.Size(818, 400);
@@ -225,6 +227,12 @@
             this.bFord_Falks_Alg.Text = "Алгоритм Форда-Фалкерсона";
             this.bFord_Falks_Alg.UseVisualStyleBackColor = true;
             // 
+            // tDrawing
+            // 
+            this.tDrawing.Enabled = true;
+            this.tDrawing.Interval = 1;
+            this.tDrawing.Tick += new System.EventHandler(this.tDrawing_Tick);
+            // 
             // Main_form
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -237,6 +245,7 @@
             this.Controls.Add(this.bClear);
             this.Controls.Add(this.bClose);
             this.Controls.Add(this.graphics);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             this.Name = "Main_form";
             this.Text = "Графові алгоритми";
             this.groupBox1.ResumeLayout(false);
@@ -266,6 +275,7 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.Button bEdm_Carp_Alg;
         private System.Windows.Forms.Button bFord_Falks_Alg;
+        private System.Windows.Forms.Timer tDrawing;
     }
 }
 
