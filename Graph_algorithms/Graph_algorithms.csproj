@@ -73,6 +73,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Graph.cs" />
     <Compile Include="Main_form.cs">
       <SubType>Form</SubType>
     </Compile>

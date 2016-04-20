@@ -28,8 +28,8 @@ namespace Graph_algorithms
             geometrics = new List<Shape>();
         }
         private SimpleOpenGlControl graphics;
-        public List<Shape> geometrics;
-        public static Highlight highlightedCircle { get; private set; }
+        private List<Shape> geometrics;
+        public Highlight highlightedNode { get; private set; }
 
         public class Shape
         {
@@ -60,6 +60,10 @@ namespace Graph_algorithms
                 text = i.ToString();
                 i++;
             }
+            public Text(int x, int y,string text) : base(x, y)
+            {
+                this.text = text;
+            }
             public string text { get;}
             private static int i = 1;
 
@@ -71,11 +75,11 @@ namespace Graph_algorithms
 
         public class Circle : Shape
         {
-            public Circle(int x, int y, Rectangle bounds) : base(x,y)
+            public Circle(int x, int y, Rectangle edges) : base(x,y)
             {
-                this.bounds = bounds;
+                this.edges = edges;
             }
-            public Rectangle bounds { get;}
+            public Rectangle edges { get;}
         }
 
         public class Highlight : Shape
@@ -125,8 +129,8 @@ namespace Graph_algorithms
                 Gl.glPushMatrix();
                 Gl.glTranslated(0, 0, 1);
                 Gl.glColor3f(0.0f, 1.0f, 0.0f);
-                Gl.glRasterPos2d(shape.x - 5, shape.y + 5);
-                Glut.glutBitmapString(Glut.GLUT_BITMAP_9_BY_15, (shape as Text).text);
+                Gl.glRasterPos2d(shape.x - 8, shape.y+5);
+                Glut.glutBitmapString(Glut.GLUT_BITMAP_HELVETICA_18, (shape as Text).text);
                 Gl.glPopMatrix();
             }
 
@@ -150,17 +154,50 @@ namespace Graph_algorithms
             }
         }
 
-        public bool checkBoundsEnter(Point pt)
+        public bool checkAreaEnter(Point pt)
         {
             foreach (Shape shape in geometrics)
                 if (shape is Circle)
-                    if ((pt.X >= (shape as Circle).bounds.Left && pt.X <= (shape as Circle).bounds.Right)
-                     && (pt.Y >= (shape as Circle).bounds.Top && pt.Y <= (shape as Circle).bounds.Bottom))
+                    if ((pt.X >= (shape as Circle).edges.Left && pt.X <= (shape as Circle).edges.Right)
+                     && (pt.Y >= (shape as Circle).edges.Top && pt.Y <= (shape as Circle).edges.Bottom))
                     {
-                        highlightedCircle = new Highlight(shape.x, shape.y);
+                        highlightedNode = new Highlight(shape.x, shape.y);
                         return true;
                     }
             return false;
+        }
+
+        private void addText(int x, int y)
+        {
+            geometrics.Add(new Text(x, y));
+        }
+
+        private void addText(int x, int y, string text)
+        {
+            geometrics.Add(new Text(x, y, text));
+        }
+
+        public void addHighlight()
+        {
+            geometrics.Add(highlightedNode);
+        }
+
+        private void addHighlight(Circle circle)
+        {
+            geometrics.Add(new Highlight(circle.x, circle.y));
+        }
+
+        public void addArc(int x, int y, int x1, int y1, string text)
+        {
+            geometrics.Add(new Arc(x,y,x1,y1));
+            geometrics.Add(new Text((x + x1)/2,(y + y1)/2,text));
+        }
+
+        public void addCircle(int x, int y)
+        {
+            Rectangle edges = new Rectangle(x - 15, y - 15, 30, 30);
+            geometrics.Add(new Circle(x, y, edges));
+            geometrics.Add(new Text(x, y));
         }
 
         public void clearAllHighlights()
@@ -174,6 +211,13 @@ namespace Graph_algorithms
 
                 }
             }
+        }
+
+        public bool hasHighlightedNode()
+        {
+            if (geometrics.FindAll(shape => shape is Highlight).Count > 0)
+                return true;
+            return false;
         }
 
         public void clearAll()
