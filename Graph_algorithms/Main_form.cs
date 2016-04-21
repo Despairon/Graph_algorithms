@@ -1,7 +1,5 @@
 ﻿using System;
-using Tao.Platform.Windows;
 using System.Windows.Forms;
-using System.Drawing;
 
 namespace Graph_algorithms
 {
@@ -12,9 +10,11 @@ namespace Graph_algorithms
             InitializeComponent();
             graph = new Graph(ref graphics);
         }
-        Graph graph;
         private bool switcher = false;
+        private SearchAlg_Form searchAlg_form;
+        public Graph graph;
         public static double weight { get; private set; }
+        
 
         private void bClose_Click(object sender, EventArgs e)
         {
@@ -41,11 +41,11 @@ namespace Graph_algorithms
                 {
                     graph.addNode(e.X, e.Y);
                     if (!graph.connect(e.X, e.Y))
-                    switcher = true;
+                        switcher = true;
                 }
                 else
                 {
-                    Graph.Node node = new Graph.Node(e.X, e.Y);
+                    var node = new Graph.Node(e.X, e.Y);
                     graph.addNode(node);
                     graph.connect(node, weight);
                     switcher = false;
@@ -73,5 +73,30 @@ namespace Graph_algorithms
         {
             graph.deleteHighlights();
         }
+
+        private void WideSearchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            searchAlg_form = new SearchAlg_Form(this);
+            searchAlg_form.ShowDialog();
+        }
+
+        private void Main_form_Shown(object sender, EventArgs e)
+        {
+            MessageBox.Show("Ласкаво просимо до системи моделювання графових алгоритмів!\n"
+                           +"Інструкції для роботи з системою:\n"
+                           +"Спочатку створіть граф: натискання мишею на білому полі створює вершину.\n"
+                           +"Натискання другий раз після створення вершини на білому полі створює другу "
+                           +"вершину, та з'єднує її з першою.\n"
+                           +"Натискання на вершину виділяє її \n"
+                           +"Натискання на білому полі при виділеній "
+                           +"вершині створює другу вершину, та з'єднує її з виділеною.\n"
+                           + "Послідовне натиснення на дві вершини з'єднує їх.\n"
+                           + "Для виконання алгоритму, виберіть потрібний алгоритм з меню та слідуйте "
+                           +"інструкціям\n",
+                            "Ласкаво просимо!",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+        }
+
     }
 }

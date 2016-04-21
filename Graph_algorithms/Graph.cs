@@ -1,16 +1,23 @@
 ﻿using System.Collections.Generic;
 using System.Drawing;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Tao.Platform.Windows;
 
 namespace Graph_algorithms
 {
-    class Graph
+    public enum algorithms : int { BFS, DFS };
+
+    public class Graph
     {
         public Graph(ref SimpleOpenGlControl graphics)
         {
             nodes = new List<Node>();
             render = new Render(ref graphics);
         }
+        private Node lastAddedNode;
+        public List<Node> nodes { get; }
+        private Render render;
 
         public class Node
         {
@@ -21,7 +28,6 @@ namespace Graph_algorithms
                 name = i;
                 connections = new Dictionary<Node, double>();
                 i++;
-               
             }
 
             public int name { get; }
@@ -29,12 +35,83 @@ namespace Graph_algorithms
             public Dictionary<Node,double> connections { get; }
             public int x { get; }
             public int y { get; }
+            public static void resetNames()
+            {
+                i = 1;
+            }
            
         }
-       
-        private Node lastAddedNode;
-        public List<Node> nodes { get; }
-        private Render render;
+
+        public class Algorithm
+        {
+            public class BFS : Algorithm
+            {
+                public BFS(Graph graph, Node start, Node goal) : base (graph)
+                {
+                    queue = new Queue<Node>();
+                    opened = new List<Node>();
+                    startNode = start;
+                    goalNode = goal;
+                    identificator = (int)algorithms.BFS;
+                    queue.Enqueue(startNode);
+                }
+                Queue<Node> queue;
+                List<Node> opened;
+                private Node startNode;
+                private Node goalNode;
+
+                public async Task make()
+                {
+                    var u = queue.Dequeue();
+                    opened.Add(u);
+                    graph.highlightNode(u);
+                    if (u == goalNode)
+                    {
+                        MessageBox.Show("Вузол " + u.name + " знайдений!");
+                        return;
+                    }
+                    else
+                        foreach (var node in u.connections)
+                        if (!opened.Contains(node.Key))
+                            queue.Enqueue(node.Key);
+                    if (queue.Count == 0)
+                    {
+                        MessageBox.Show("Вузол" + goalNode.name + "неможливо досягти з початкового вузла!");
+                        return;
+                    }
+                    await Task.Delay(1000);
+                    await make();
+                }
+
+            }
+
+            public class DFS : Algorithm
+            {
+                public DFS(Graph graph, Node start, Node goal) : base(graph)
+                {
+                    queue = new Queue<Node>();
+                    startNode = start;
+                    goalNode = goal;
+                    identificator = (int)algorithms.DFS;
+                }
+                Queue<Node> queue;
+                private Node startNode;
+                private Node goalNode;
+
+                public void make()
+                {
+
+                }
+
+            }
+
+            public Algorithm(Graph graph)
+            {
+                this.graph = graph;
+            }
+            protected Graph graph;
+            public int identificator;
+        }
 
         public void drawAll()
         {
@@ -45,12 +122,14 @@ namespace Graph_algorithms
         {
             render.clearAll();
             nodes.Clear();
+            Node.resetNames();
         }
 
         public void deleteHighlights()
         {
             render.clearAllHighlights();
         }
+
         public void addNode(int x, int y)
         {
             Node node = new Node(x, y);
@@ -82,7 +161,8 @@ namespace Graph_algorithms
 
         public bool highlightNode(int x, int y)
         {
-            Node tempLeft = null, tempRight = null;
+            Node tempLeft = null;
+            Node tempRight = null;
             if (render.hasHighlightedNode())
                 tempLeft = nodes.Find(node => node.x == render.highlightedNode.x 
                                    && node.y == render.highlightedNode.y);
@@ -92,7 +172,7 @@ namespace Graph_algorithms
                 {
                     tempRight = nodes.Find(node => node.x == render.highlightedNode.x
                                    && node.y == render.highlightedNode.y);
-                    if (!connected(tempLeft, tempRight) && tempLeft != tempRight)
+                    if (!isConnected(tempLeft, tempRight) && tempLeft != tempRight)
                     {
                         connect(tempLeft, tempRight, Main_form.weight);
                         render.clearAllHighlights();
@@ -104,6 +184,11 @@ namespace Graph_algorithms
                 return true;
             }
             return false;
+        }
+
+        public void highlightNode(Node node)
+        {
+            render.addHighlight(node.x,node.y);
         }
 
         public bool connect(int x, int y)
@@ -121,11 +206,25 @@ namespace Graph_algorithms
             else
                 return false;
         }
-        public bool connected(Node left, Node right)
+
+        private bool isConnected(Node left, Node right)
         {
             if (left.connections.ContainsKey(right))
                return true;
             return false;
+        }
+
+        public void doAlgorithm (Algorithm algorithm)
+        {
+            switch (algorithm.identificator)
+            {
+                case (int)algorithms.BFS:
+                    (algorithm as Algorithm.BFS).make();
+                    break;
+                case (int)algorithms.DFS:
+                    (algorithm as Algorithm.DFS).make();
+                    break;
+            }
         }
 
     }

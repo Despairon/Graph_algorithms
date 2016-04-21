@@ -32,7 +32,7 @@
             this.graphics = new Tao.Platform.Windows.SimpleOpenGlControl();
             this.bClose = new System.Windows.Forms.Button();
             this.bClear = new System.Windows.Forms.Button();
-            this.tDrawing = new System.Windows.Forms.Timer(this.components);
+            this.renderTimer = new System.Windows.Forms.Timer(this.components);
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripMenuItem();
             this.WideSearchToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -93,11 +93,11 @@
             this.bClear.UseVisualStyleBackColor = true;
             this.bClear.Click += new System.EventHandler(this.bClear_Click);
             // 
-            // tDrawing
+            // renderTimer
             // 
-            this.tDrawing.Enabled = true;
-            this.tDrawing.Interval = 1;
-            this.tDrawing.Tick += new System.EventHandler(this.tDrawing_Tick);
+            this.renderTimer.Enabled = true;
+            this.renderTimer.Interval = 1;
+            this.renderTimer.Tick += new System.EventHandler(this.tDrawing_Tick);
             // 
             // menuStrip1
             // 
@@ -128,6 +128,7 @@
             this.WideSearchToolStripMenuItem.Name = "WideSearchToolStripMenuItem";
             this.WideSearchToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.WideSearchToolStripMenuItem.Text = "Пошук в ширину";
+            this.WideSearchToolStripMenuItem.Click += new System.EventHandler(this.WideSearchToolStripMenuItem_Click);
             // 
             // DeepSearchToolStripMenuItem
             // 
@@ -251,6 +252,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Main_form";
             this.Text = "Графові алгоритми";
+            this.Shown += new System.EventHandler(this.Main_form_Shown);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.ResumeLayout(false);
@@ -263,7 +265,7 @@
         private Tao.Platform.Windows.SimpleOpenGlControl graphics;
         private System.Windows.Forms.Button bClose;
         private System.Windows.Forms.Button bClear;
-        private System.Windows.Forms.Timer tDrawing;
+        private System.Windows.Forms.Timer renderTimer;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem WideSearchToolStripMenuItem;

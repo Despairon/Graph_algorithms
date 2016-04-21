@@ -182,9 +182,9 @@ namespace Graph_algorithms
             geometrics.Add(highlightedNode);
         }
 
-        private void addHighlight(Circle circle)
+        public void addHighlight(int x, int y)
         {
-            geometrics.Add(new Highlight(circle.x, circle.y));
+            geometrics.Add(new Highlight(x, y));
         }
 
         public void addArc(int x, int y, int x1, int y1, string text)
