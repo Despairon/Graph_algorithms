@@ -6,7 +6,7 @@ using Tao.Platform.Windows;
 
 namespace Graph_algorithms
 {
-    public enum algorithms : int { BFS, DFS };
+    public enum algorithms { BFS, DFS };
 
     public class Graph
     {
@@ -89,18 +89,34 @@ namespace Graph_algorithms
             {
                 public DFS(Graph graph, Node start, Node goal) : base(graph)
                 {
-                    queue = new Queue<Node>();
+                    opened = new List<Node>();
                     startNode = start;
                     goalNode = goal;
                     identificator = (int)algorithms.DFS;
                 }
-                Queue<Node> queue;
+                List<Node> opened;
                 private Node startNode;
                 private Node goalNode;
 
-                public void make()
+                public async Task make(Node u)
                 {
-
+                    if (u == goalNode)
+                    {
+                        MessageBox.Show("Вузол " + u.name + " знайдений!");
+                        return;
+                    }
+                    opened.Add(u);
+                    graph.highlightNode(u);
+                    foreach (var w in u.connections)
+                        if (!opened.Contains(w.Key))
+                        {
+                            await Task.Delay(1000);
+                            await make(w.Key);
+                        }
+                }
+                public async Task make()
+                {
+                    await make(startNode);
                 }
 
             }
@@ -214,17 +230,20 @@ namespace Graph_algorithms
             return false;
         }
 
-        public void doAlgorithm (Algorithm algorithm)
+        public async Task doAlgorithm (Algorithm algorithm)
         {
+            Program.disableForm();
             switch (algorithm.identificator)
             {
                 case (int)algorithms.BFS:
-                    (algorithm as Algorithm.BFS).make();
+                    await (algorithm as Algorithm.BFS).make();
                     break;
                 case (int)algorithms.DFS:
-                    (algorithm as Algorithm.DFS).make();
+                    await (algorithm as Algorithm.DFS).make();
                     break;
             }
+            Program.enableForm();
+
         }
 
     }

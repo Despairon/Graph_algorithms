@@ -135,6 +135,7 @@
             this.DeepSearchToolStripMenuItem.Name = "DeepSearchToolStripMenuItem";
             this.DeepSearchToolStripMenuItem.Size = new System.Drawing.Size(171, 22);
             this.DeepSearchToolStripMenuItem.Text = "Пошук в глибину";
+            this.DeepSearchToolStripMenuItem.Click += new System.EventHandler(this.DeepSearchToolStripMenuItem_Click);
             // 
             // мінімальніОстовніДереваToolStripMenuItem
             // 

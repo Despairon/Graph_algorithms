@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace Graph_algorithms
@@ -16,7 +13,19 @@ namespace Graph_algorithms
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Main_form());
+            form = new Main_form();
+            Application.Run(form);
+        }
+        static Main_form form;
+
+        public static void disableForm()
+        {
+            form.Enabled = false;
+        }
+
+        public static void enableForm()
+        {
+            form.Enabled = true;
         }
     }
 }

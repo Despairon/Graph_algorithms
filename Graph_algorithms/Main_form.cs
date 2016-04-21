@@ -76,7 +76,7 @@ namespace Graph_algorithms
 
         private void WideSearchToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            searchAlg_form = new SearchAlg_Form(this);
+            searchAlg_form = new SearchAlg_Form(this,(int)algorithms.BFS);
             searchAlg_form.ShowDialog();
         }
 
@@ -96,6 +96,12 @@ namespace Graph_algorithms
                             "Ласкаво просимо!",
                             MessageBoxButtons.OK,
                             MessageBoxIcon.Information);
+        }
+
+        private void DeepSearchToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            searchAlg_form = new SearchAlg_Form(this, (int)algorithms.DFS);
+            searchAlg_form.ShowDialog();
         }
 
     }

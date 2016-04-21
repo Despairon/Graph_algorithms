@@ -1,21 +1,22 @@
 ﻿using System;
 using System.Windows.Forms;
-using System.Collections.Generic;
 
 namespace Graph_algorithms
 {
     public partial class SearchAlg_Form : Form
     {
-        public SearchAlg_Form(Main_form parent)
+        public SearchAlg_Form(Main_form parent, int algorithm)
         {
             InitializeComponent();
             start = null;
             goal = null;
             main_form = parent;
+            this.algorithm = algorithm;
         }
         Graph.Node start;
         Graph.Node goal;
         Main_form main_form;
+        int algorithm;
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -31,7 +32,15 @@ namespace Graph_algorithms
                 if ((start == null) || (goal == null))
                     throw new FormatException();
                 Close();
-                    main_form.graph.doAlgorithm(new Graph.Algorithm.BFS(main_form.graph,start,goal));
+                switch (algorithm)
+                {
+                    case (int)algorithms.BFS:
+                        main_form.graph.doAlgorithm(new Graph.Algorithm.BFS(main_form.graph, start, goal));
+                        break;
+                    case (int)algorithms.DFS:
+                        main_form.graph.doAlgorithm(new Graph.Algorithm.DFS(main_form.graph, start, goal));
+                        break;
+                }
             }
             catch (FormatException)
             {
