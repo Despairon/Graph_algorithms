@@ -4,6 +4,7 @@ using Tao.OpenGl;
 using Tao.FreeGlut;
 using Tao.Platform.Windows;
 using System.Drawing;
+using System.Windows.Forms;
 
 namespace Graph_algorithms
 {
@@ -29,9 +30,9 @@ namespace Graph_algorithms
         }
         private SimpleOpenGlControl graphics;
         private List<Shape> geometrics;
-        public Highlight highlightedNode { get; private set; }
+        public NodeHighlight pickedNode { get; private set; }
 
-        public class Shape
+        public abstract class Shape
         {
             public Shape (int x, int y)
             {
@@ -40,6 +41,7 @@ namespace Graph_algorithms
             }
             public int x { get;}
             public int y { get;}
+            public abstract void draw();
         }
 
         public class Arc : Shape
@@ -49,8 +51,22 @@ namespace Graph_algorithms
                 this.x1 = x1;
                 this.y1 = y1;
             }
-            public int x1 { get;}
-            public int y1 { get;}
+            private int x1;
+            private int y1;
+
+            public override void draw()
+            {
+                Gl.glLoadIdentity();
+                Gl.glBegin(Gl.GL_LINES);
+                Gl.glPushMatrix();
+                Gl.glTranslated(0, 0, -1);
+                Gl.glColor3f(0.0f, 0.0f, 0.0f);
+                Gl.glVertex2d(x, y);
+                Gl.glVertex2d(x1, y1);
+                Gl.glPopMatrix();
+                Gl.glEnd();
+            }
+
         }
 
         public class Text : Shape
@@ -64,13 +80,24 @@ namespace Graph_algorithms
             {
                 this.text = text;
             }
-            public string text { get;}
+            private string text;
             private static int i = 1;
 
             public static void clear()
             {
                 i = 1;
-            } 
+            }
+
+            public override void draw()
+            {
+                Gl.glLoadIdentity();
+                Gl.glPushMatrix();
+                Gl.glTranslated(0, 0, 1);
+                Gl.glColor3f(0.0f, 1.0f, 0.0f);
+                Gl.glRasterPos2d(x - 8, y + 5);
+                Glut.glutBitmapString(Glut.GLUT_BITMAP_HELVETICA_18, text);
+                Gl.glPopMatrix();
+            }
         }
 
         public class Circle : Shape
@@ -80,18 +107,8 @@ namespace Graph_algorithms
                 this.edges = edges;
             }
             public Rectangle edges { get;}
-        }
 
-        public class Highlight : Shape
-        {
-            public Highlight(int x, int y) : base (x,y)
-            {
-            }
-        }
-
-        private void drawShape(Shape shape)
-        {
-            if (shape is Circle)
+            public override void draw()
             {
                 const int R = 15;
                 const int SEGMENTS = 100;
@@ -99,42 +116,25 @@ namespace Graph_algorithms
                 Gl.glLoadIdentity();
                 Gl.glColor3f(0.0f, 0.0f, 0.0f);
                 Gl.glBegin(Gl.GL_TRIANGLE_FAN);
-                Gl.glVertex2d(shape.x, shape.y);
+                Gl.glVertex2d(x, y);
                 for (int i = 0; i <= SEGMENTS; i++)
                 {
                     float a = (float)i / (float)SEGMENTS * PI * 2.0f;
                     float x = (float)(R * Math.Cos(a));
                     float y = (float)(R * Math.Sin(a));
-                    Gl.glVertex2d(x + shape.x, y + shape.y);
+                    Gl.glVertex2d(this.x + x, this.y + y);
                 }
                 Gl.glEnd();
             }
+        }
 
-            if (shape is Arc)
+        public class NodeHighlight : Shape
+        {
+            public NodeHighlight(int x, int y) : base (x,y)
             {
-                Gl.glLoadIdentity();
-                Gl.glBegin(Gl.GL_LINES);
-                Gl.glPushMatrix();
-                Gl.glTranslated(0, 0, -1);
-                Gl.glColor3f(0.0f, 0.0f, 0.0f);
-                Gl.glVertex2d(shape.x, shape.y);
-                Gl.glVertex2d((shape as Arc).x1, (shape as Arc).y1);
-                Gl.glPopMatrix();
-                Gl.glEnd();
             }
 
-            if (shape is Text)
-            {
-                Gl.glLoadIdentity();
-                Gl.glPushMatrix();
-                Gl.glTranslated(0, 0, 1);
-                Gl.glColor3f(0.0f, 1.0f, 0.0f);
-                Gl.glRasterPos2d(shape.x - 8, shape.y+5);
-                Glut.glutBitmapString(Glut.GLUT_BITMAP_HELVETICA_18, (shape as Text).text);
-                Gl.glPopMatrix();
-            }
-
-            if (shape is Highlight)
+            public override void draw()
             {
                 const int R = 20;
                 const int SEGMENTS = 100;
@@ -142,14 +142,39 @@ namespace Graph_algorithms
                 Gl.glLoadIdentity();
                 Gl.glColor3f(1.0f, 0.0f, 0.0f);
                 Gl.glBegin(Gl.GL_TRIANGLE_FAN);
-                Gl.glVertex2d(shape.x, shape.y);
+                Gl.glVertex2d(x, y);
                 for (int i = 0; i <= SEGMENTS; i++)
                 {
                     float a = (float)i / (float)SEGMENTS * PI * 2.0f;
                     float x = (float)(R * Math.Cos(a));
                     float y = (float)(R * Math.Sin(a));
-                    Gl.glVertex2d(x + shape.x, y + shape.y);
+                    Gl.glVertex2d(this.x + x, this.y + y);
                 }
+                Gl.glEnd();
+            }
+        }
+
+        public class ArcHighlight : Shape
+        {
+            public ArcHighlight(int x, int y, int x1, int y1) : base(x,y)
+            {
+                this.x1 = x1;
+                this.y1 = y1;
+            }
+            private int x1;
+            private int y1;
+
+            public override void draw()
+            {
+                Gl.glLoadIdentity();
+                Gl.glBegin(Gl.GL_QUADS);
+                Gl.glPushMatrix();
+                Gl.glColor3f(0.0f, 0.0f, 1.0f);
+                Gl.glVertex2d(x1 + 3, y1+3);
+                Gl.glVertex2d(x1 - 3, y1-3);
+                Gl.glVertex2d(x - 3, y-3);
+                Gl.glVertex2d(x + 3, y+3);
+                Gl.glPopMatrix();
                 Gl.glEnd();
             }
         }
@@ -161,7 +186,7 @@ namespace Graph_algorithms
                     if ((pt.X >= (shape as Circle).edges.Left && pt.X <= (shape as Circle).edges.Right)
                      && (pt.Y >= (shape as Circle).edges.Top && pt.Y <= (shape as Circle).edges.Bottom))
                     {
-                        highlightedNode = new Highlight(shape.x, shape.y);
+                        pickedNode = new NodeHighlight(shape.x, shape.y);
                         return true;
                     }
             return false;
@@ -177,16 +202,20 @@ namespace Graph_algorithms
             geometrics.Add(new Text(x, y, text));
         }
 
-        public void addHighlight()
+        public void addNodeHighlight()
         {
-            geometrics.Add(highlightedNode);
+            geometrics.Add(pickedNode);
         }
 
-        public void addHighlight(int x, int y)
+        public void addNodeHighlight(int x, int y)
         {
-            geometrics.Add(new Highlight(x, y));
+            geometrics.Add(new NodeHighlight(x, y));
         }
 
+        public void addArcHighlight(int x, int y, int x1, int y1)
+        {
+            geometrics.Add(new ArcHighlight(x,y,x1,y1));
+        }
         public void addArc(int x, int y, int x1, int y1, string text)
         {
             geometrics.Add(new Arc(x,y,x1,y1));
@@ -204,18 +233,17 @@ namespace Graph_algorithms
         {
             for (int i = 0; i < geometrics.Count; i++)
             {
-                if (geometrics[i] is Highlight)
+                if (geometrics[i] is NodeHighlight || geometrics[i] is ArcHighlight)
                 {
                     geometrics.RemoveAt(i);
                     i--;
-
                 }
             }
         }
 
         public bool hasHighlightedNode()
         {
-            if (geometrics.FindAll(shape => shape is Highlight).Count > 0)
+            if (geometrics.FindAll(shape => shape is NodeHighlight).Count > 0)
                 return true;
             return false;
         }
@@ -231,7 +259,7 @@ namespace Graph_algorithms
             Gl.glClear(Gl.GL_COLOR_BUFFER_BIT | Gl.GL_DEPTH_BUFFER_BIT);
 
             foreach (Shape shape in geometrics)
-                drawShape(shape);
+                shape.draw();
 
             Gl.glFlush();
             graphics.Invalidate();

@@ -163,21 +163,17 @@ namespace Graph_algorithms
                             sets.Remove(setRight);
                             graph.highlightNode(arc.Key.Key);
                             await Task.Delay(1000);
+                            graph.highlightArc(arc.Key.Key.x, arc.Key.Key.y,
+                                               arc.Key.Value.x, arc.Key.Value.y);
                             graph.highlightNode(arc.Key.Value);
                             await Task.Delay(1000);
-                            graph.deleteHighlights();
                         }
                     }
-                    try
-                    {
-                        foreach (var node in sets[0])
-                            graph.highlightNode(node);
+                    if (sets.Count == 1)
                         MessageBox.Show("Мінімальне остовне дерево побудовано!");
-                    }
-                    catch (Exception)
-                    {
+                    else
                         MessageBox.Show("Мінімальне остовне дерево не існує!");
-                    }
+
 
                 }
             }
@@ -242,14 +238,14 @@ namespace Graph_algorithms
             Node tempLeft = null;
             Node tempRight = null;
             if (render.hasHighlightedNode())
-                tempLeft = nodes.Find(node => node.x == render.highlightedNode.x 
-                                   && node.y == render.highlightedNode.y);
+                tempLeft = nodes.Find(node => node.x == render.pickedNode.x 
+                                   && node.y == render.pickedNode.y);
             if (render.checkAreaEnter(new Point(x, y)))
             {
                 if (tempLeft != null)
                 {
-                    tempRight = nodes.Find(node => node.x == render.highlightedNode.x
-                                   && node.y == render.highlightedNode.y);
+                    tempRight = nodes.Find(node => node.x == render.pickedNode.x
+                                   && node.y == render.pickedNode.y);
                     if (!isConnected(tempLeft, tempRight) && tempLeft != tempRight)
                     {
                         connect(tempLeft, tempRight, Main_form.weight);
@@ -258,7 +254,7 @@ namespace Graph_algorithms
                     }
                 }
                 render.clearAllHighlights();
-                render.addHighlight();
+                render.addNodeHighlight();
                 return true;
             }
             return false;
@@ -266,7 +262,12 @@ namespace Graph_algorithms
 
         public void highlightNode(Node node)
         {
-            render.addHighlight(node.x,node.y);
+            render.addNodeHighlight(node.x,node.y);
+        }
+
+        public void highlightArc(int x, int y, int x1, int y1)
+        {
+            render.addArcHighlight(x,y,x1,y1);
         }
 
         public bool connect(int x, int y)
@@ -275,8 +276,8 @@ namespace Graph_algorithms
             Node right = nodes.Find(node => node.x == x && node.y == y);
             if (render.hasHighlightedNode())
             {
-                left = nodes.Find(node => node.x == render.highlightedNode.x
-                                   && node.y == render.highlightedNode.y);
+                left = nodes.Find(node => node.x == render.pickedNode.x
+                                   && node.y == render.pickedNode.y);
                 connect(left, right, Main_form.weight);
                 render.clearAllHighlights();
                 return true;
