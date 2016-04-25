@@ -173,9 +173,47 @@ namespace Graph_algorithms
                         MessageBox.Show("Мінімальне остовне дерево побудовано!");
                     else
                         MessageBox.Show("Мінімальне остовне дерево не існує!");
-
-
                 }
+            }
+
+            public class Prim : Algorithm
+            {
+                public Prim(Graph graph) : base (graph)
+                {
+                    MST = new List<Node>();
+                    MST.Add(graph.nodes.First());
+                }
+                List<Node> MST;
+
+                public override async Task make()
+                {
+                    await make(MST.First());
+                }
+
+                private async Task make(Node node)
+                {
+                    //graph.highlightNode(node);
+                    //await Task.Delay(1000);
+                }
+
+                //private Node min(Dictionary<Node,double> arcs)
+                //{
+                //    KeyValuePair<Node, double> min = arcs.First();
+                //    foreach (var arc in arcs)
+                //    {
+                //        if (arc.Value <= min.Value)
+                //            min = arc;
+                //    }
+                //    return min.Key;
+                //}
+
+                //private Node minAcceptable()
+                //{
+                //    foreach (var node in MST)
+                //        if (!MST.Contains(min(node.connections)))
+                //            return min(node.connections);
+                //    return null;
+                //}
             }
 
             public Algorithm(Graph graph)
@@ -184,6 +222,7 @@ namespace Graph_algorithms
             }
             protected Graph graph;
             protected bool success = false;
+
             public abstract Task make();
         }
 

@@ -158,6 +158,7 @@
             this.PrimsAlgToolStripMenuItem.Name = "PrimsAlgToolStripMenuItem";
             this.PrimsAlgToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.PrimsAlgToolStripMenuItem.Text = "Алгоритм Пріма";
+            this.PrimsAlgToolStripMenuItem.Click += new System.EventHandler(this.PrimsAlgToolStripMenuItem_Click);
             // 
             // найкоротшіШляхиToolStripMenuItem
             // 

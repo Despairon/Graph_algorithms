@@ -108,5 +108,10 @@ namespace Graph_algorithms
         {
             graph.doAlgorithm(new Graph.Algorithm.Kruskal(graph));
         }
+
+        private void PrimsAlgToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            graph.doAlgorithm(new Graph.Algorithm.Prim(graph));
+        }
     }
 }
