@@ -151,6 +151,7 @@
             this.CruscalsAlgToolStripMenuItem.Name = "CruscalsAlgToolStripMenuItem";
             this.CruscalsAlgToolStripMenuItem.Size = new System.Drawing.Size(183, 22);
             this.CruscalsAlgToolStripMenuItem.Text = "Алгоритм Крускала";
+            this.CruscalsAlgToolStripMenuItem.Click += new System.EventHandler(this.CruscalsAlgToolStripMenuItem_Click);
             // 
             // PrimsAlgToolStripMenuItem
             // 

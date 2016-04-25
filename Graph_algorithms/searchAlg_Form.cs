@@ -3,6 +3,7 @@ using System.Windows.Forms;
 
 namespace Graph_algorithms
 {
+
     public partial class SearchAlg_Form : Form
     {
         public SearchAlg_Form(Main_form parent, int algorithm)

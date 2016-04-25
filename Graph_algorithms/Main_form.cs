@@ -104,5 +104,9 @@ namespace Graph_algorithms
             searchAlg_form.ShowDialog();
         }
 
+        private void CruscalsAlgToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            graph.doAlgorithm(new Graph.Algorithm.Kruskal(graph));
+        }
     }
 }

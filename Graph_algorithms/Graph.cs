@@ -3,10 +3,12 @@ using System.Drawing;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Tao.Platform.Windows;
+using System.Linq;
+using System;
 
 namespace Graph_algorithms
 {
-    public enum algorithms { BFS, DFS };
+    enum algorithms { BFS, DFS }
 
     public class Graph
     {
@@ -42,7 +44,7 @@ namespace Graph_algorithms
            
         }
 
-        public class Algorithm
+        public abstract class Algorithm
         {
             public class BFS : Algorithm
             {
@@ -52,15 +54,14 @@ namespace Graph_algorithms
                     opened = new List<Node>();
                     startNode = start;
                     goalNode = goal;
-                    identificator = (int)algorithms.BFS;
                     queue.Enqueue(startNode);
                 }
-                Queue<Node> queue;
-                List<Node> opened;
+                private Queue<Node> queue;
+                private List<Node> opened;
                 private Node startNode;
                 private Node goalNode;
 
-                public async Task make()
+                public override async Task make()
                 {
                     var u = queue.Dequeue();
                     opened.Add(u);
@@ -68,6 +69,7 @@ namespace Graph_algorithms
                     if (u == goalNode)
                     {
                         MessageBox.Show("Вузол " + u.name + " знайдений!");
+                        success = true;
                         return;
                     }
                     else
@@ -92,33 +94,92 @@ namespace Graph_algorithms
                     opened = new List<Node>();
                     startNode = start;
                     goalNode = goal;
-                    identificator = (int)algorithms.DFS;
                 }
-                List<Node> opened;
+                private List<Node> opened;
                 private Node startNode;
                 private Node goalNode;
 
                 public async Task make(Node u)
                 {
+                    opened.Add(u);
+                    graph.highlightNode(u);
                     if (u == goalNode)
                     {
                         MessageBox.Show("Вузол " + u.name + " знайдений!");
-                        return;
+                        success = true;
                     }
-                    opened.Add(u);
-                    graph.highlightNode(u);
                     foreach (var w in u.connections)
                         if (!opened.Contains(w.Key))
                         {
-                            await Task.Delay(1000);
-                            await make(w.Key);
+                            if (success)
+                                break;
+                            else
+                            {
+                                await Task.Delay(1000);
+                                await make(w.Key);
+                            }
                         }
                 }
-                public async Task make()
+
+                public override async Task make()
                 {
                     await make(startNode);
                 }
 
+            }
+
+            public class Kruskal : Algorithm
+            {
+                public Kruskal(Graph graph) : base(graph)
+                {
+                    arcs = new Dictionary<KeyValuePair<Node, Node>, double>();
+                    sets = new List<List<Node>>();
+                    foreach (var node in graph.nodes)
+                    {
+                        var list = new List<Node>();
+                        list.Add(node);
+                        sets.Add(list);
+                    }
+                    foreach (var node in graph.nodes)
+                        foreach (var arc in node.connections)
+                            if (!arcs.ContainsKey(new KeyValuePair<Node, Node>(node, arc.Key))
+                             && !arcs.ContainsKey(new KeyValuePair<Node, Node>(arc.Key, node)))
+                                arcs.Add(new KeyValuePair<Node, Node>(node, arc.Key),arc.Value);
+                }
+                private Dictionary<KeyValuePair<Node, Node>, double> arcs;
+                private List<List<Node>> sets;
+
+                public override async Task make()
+                {
+                    List<Node> setLeft = null;
+                    List<Node> setRight = null;
+                    foreach (var arc in arcs.OrderBy(pair => pair.Value))
+                    {
+                        setLeft = sets.Find(set => set.Contains(arc.Key.Key));
+                        setRight = sets.Find(set => set.Contains(arc.Key.Value));
+                        if (setLeft != setRight)
+                        {
+                            setLeft.AddRange(setRight);
+                            sets.Remove(setRight);
+                            graph.highlightNode(arc.Key.Key);
+                            await Task.Delay(1000);
+                            graph.highlightNode(arc.Key.Value);
+                            await Task.Delay(1000);
+                            graph.deleteHighlights();
+                        }
+                    }
+                    try
+                    {
+                        foreach (var node in sets[0])
+                            graph.highlightNode(node);
+                        MessageBox.Show("Мінімальне остовне дерево побудовано!");
+                    }
+                    catch (Exception)
+                    {
+                        MessageBox.Show("Мінімальне остовне дерево не існує!");
+                    }
+
+                }
             }
 
             public Algorithm(Graph graph)
@@ -126,7 +187,8 @@ namespace Graph_algorithms
                 this.graph = graph;
             }
             protected Graph graph;
-            public int identificator;
+            protected bool success = false;
+            public abstract Task make();
         }
 
         public void drawAll()
@@ -233,15 +295,7 @@ namespace Graph_algorithms
         public async Task doAlgorithm (Algorithm algorithm)
         {
             Program.disableForm();
-            switch (algorithm.identificator)
-            {
-                case (int)algorithms.BFS:
-                    await (algorithm as Algorithm.BFS).make();
-                    break;
-                case (int)algorithms.DFS:
-                    await (algorithm as Algorithm.DFS).make();
-                    break;
-            }
+            await algorithm.make();
             Program.enableForm();
 
         }
