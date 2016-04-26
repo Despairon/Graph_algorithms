@@ -48,7 +48,7 @@ namespace Graph_algorithms
         {
             public class BFS : Algorithm
             {
-                public BFS(Graph graph, Node start, Node goal) : base (graph)
+                public BFS(Graph graph, Node start, Node goal) : base(graph)
                 {
                     queue = new Queue<Node>();
                     opened = new List<Node>();
@@ -61,6 +61,20 @@ namespace Graph_algorithms
                 private Node startNode;
                 private Node goalNode;
 
+                protected override bool success
+                {
+                    get { return _success; }
+                    set
+                    {
+                       if (value)
+                            MessageBox.Show("Цільовий вузол знайдений!");
+                       else
+                            MessageBox.Show("Цільовий вузол неможливо досягти з початкового вузла!");
+                        _success = value;
+                    }
+                }
+
+
                 public override async Task make()
                 {
                     var u = queue.Dequeue();
@@ -68,17 +82,16 @@ namespace Graph_algorithms
                     graph.highlightNode(u);
                     if (u == goalNode)
                     {
-                        MessageBox.Show("Вузол " + u.name + " знайдений!");
                         success = true;
                         return;
                     }
                     else
                         foreach (var node in u.connections)
-                        if (!opened.Contains(node.Key))
-                            queue.Enqueue(node.Key);
+                            if (!opened.Contains(node.Key))
+                                queue.Enqueue(node.Key);
                     if (queue.Count == 0)
                     {
-                        MessageBox.Show("Вузол" + goalNode.name + "неможливо досягти з початкового вузла!");
+                        success = false;
                         return;
                     }
                     await Task.Delay(1000);
@@ -99,15 +112,27 @@ namespace Graph_algorithms
                 private Node startNode;
                 private Node goalNode;
 
+                protected override bool success
+                {
+                    get { return _success; }
+
+
+                    set
+                    {
+                        if (value)
+                            MessageBox.Show("Цільовий вузол знайдений!");
+                        else
+                            MessageBox.Show("Цільовий вузол неможливо досягти з початкового вузла!");
+                        _success = value;
+                    }
+                }
+
                 public async Task make(Node u)
                 {
                     opened.Add(u);
                     graph.highlightNode(u);
                     if (u == goalNode)
-                    {
-                        MessageBox.Show("Вузол " + u.name + " знайдений!");
                         success = true;
-                    }
                     foreach (var w in u.connections)
                         if (!opened.Contains(w.Key))
                         {
@@ -144,10 +169,24 @@ namespace Graph_algorithms
                         foreach (var arc in node.connections)
                             if (!arcs.ContainsKey(new KeyValuePair<Node, Node>(node, arc.Key))
                              && !arcs.ContainsKey(new KeyValuePair<Node, Node>(arc.Key, node)))
-                                arcs.Add(new KeyValuePair<Node, Node>(node, arc.Key),arc.Value);
+                                arcs.Add(new KeyValuePair<Node, Node>(node, arc.Key), arc.Value);
                 }
                 private Dictionary<KeyValuePair<Node, Node>, double> arcs;
                 private List<List<Node>> sets;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                            MessageBox.Show("Мінімальне остовне дерево побудовано!");
+                        else
+                            MessageBox.Show("Мінімальне остовне дерево не існує!");
+                        _success = value;
+                    }
+                }
 
                 public override async Task make()
                 {
@@ -159,61 +198,91 @@ namespace Graph_algorithms
                         setRight = sets.Find(set => set.Contains(arc.Key.Value));
                         if (setLeft != setRight)
                         {
+                            await Task.Delay(1000);
                             setLeft.AddRange(setRight);
                             sets.Remove(setRight);
                             graph.highlightNode(arc.Key.Key);
-                            await Task.Delay(1000);
                             graph.highlightArc(arc.Key.Key.x, arc.Key.Key.y,
                                                arc.Key.Value.x, arc.Key.Value.y);
                             graph.highlightNode(arc.Key.Value);
-                            await Task.Delay(1000);
                         }
                     }
                     if (sets.Count == 1)
-                        MessageBox.Show("Мінімальне остовне дерево побудовано!");
+                        success = true;
                     else
-                        MessageBox.Show("Мінімальне остовне дерево не існує!");
+                        success = false;
                 }
             }
 
             public class Prim : Algorithm
             {
-                public Prim(Graph graph) : base (graph)
+                public Prim(Graph graph) : base(graph)
                 {
                     MST = new List<Node>();
                     MST.Add(graph.nodes.First());
                 }
                 List<Node> MST;
 
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                            MessageBox.Show("Мінімальне остовне дерево побудовано!");
+                        else
+                            MessageBox.Show("Мінімальне остовне дерево не існує!");
+                        _success = value;
+                    }
+                }
+
                 public override async Task make()
                 {
-                    await make(MST.First());
+                    try
+                    {
+                        var nodes = new List<Node>(graph.nodes);
+                        nodes.Remove(MST.First());
+                        graph.highlightNode(MST.First());
+                        while (nodes.Count > 0)
+                        {
+                            await Task.Delay(1000);
+                            var next = minAcceptable();
+                            nodes.Remove(next);
+                            MST.Add(next);
+                            graph.highlightNode(next);
+                        }
+                        success = true;
+                    }
+                    catch (Exception)
+                    {
+                        success = false;
+                    }
                 }
 
-                private async Task make(Node node)
+                private Node minAcceptable()
                 {
-                    //graph.highlightNode(node);
-                    //await Task.Delay(1000);
+                    var acceptables = new List<KeyValuePair<Node,double>>();
+                    foreach (var node in MST)
+                        foreach (var arc in node.connections)
+                            if (!MST.Contains(arc.Key))
+                                acceptables.Add(new KeyValuePair<Node, double>(arc.Key, arc.Value));
+                    return min(acceptables);
                 }
 
-                //private Node min(Dictionary<Node,double> arcs)
-                //{
-                //    KeyValuePair<Node, double> min = arcs.First();
-                //    foreach (var arc in arcs)
-                //    {
-                //        if (arc.Value <= min.Value)
-                //            min = arc;
-                //    }
-                //    return min.Key;
-                //}
+                private Node min(List<KeyValuePair<Node, double>> arcs)
+                {
+                    KeyValuePair<Node, double> min = arcs.First();
+                    foreach (var arc in arcs)
+                        if (arc.Value < min.Value)
+                            min = arc;
 
-                //private Node minAcceptable()
-                //{
-                //    foreach (var node in MST)
-                //        if (!MST.Contains(min(node.connections)))
-                //            return min(node.connections);
-                //    return null;
-                //}
+                    var left = graph.nodes.Find(node => node.connections.ContainsKey(min.Key) 
+                                          && node.connections.ContainsValue(min.Value));
+                    graph.highlightArc(left.x,left.y,min.Key.x,min.Key.y);
+
+                    return min.Key;
+                }
             }
 
             public Algorithm(Graph graph)
@@ -221,7 +290,8 @@ namespace Graph_algorithms
                 this.graph = graph;
             }
             protected Graph graph;
-            protected bool success = false;
+            protected  bool _success;
+            protected abstract bool success { get; set; }
 
             public abstract Task make();
         }
@@ -335,6 +405,7 @@ namespace Graph_algorithms
         public async Task doAlgorithm (Algorithm algorithm)
         {
             Program.disableForm();
+            deleteHighlights();
             await algorithm.make();
             Program.enableForm();
 
