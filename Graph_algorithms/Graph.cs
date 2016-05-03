@@ -8,7 +8,7 @@ using System;
 
 namespace Graph_algorithms
 {
-    enum algorithms { BFS, DFS }
+    enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS }
 
     public class Graph
     {
@@ -282,6 +282,51 @@ namespace Graph_algorithms
                     graph.highlightArc(left.x,left.y,min.Key.x,min.Key.y);
 
                     return min.Key;
+                }
+            }
+
+            public class Dijkstras : Algorithm
+            {
+                public Dijkstras(Graph graph, Node start, Node goal) : base (graph)
+                {
+                    this.start = start;
+                    this.goal = goal;
+                    marks = new Dictionary<Node, double>();
+                }
+                const int INF = 1000000000;
+                Node start;
+                Node goal;
+                Dictionary<Node, double> marks;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                            MessageBox.Show("Найкоротший шлях між "
+                                           + start.name.ToString() +" та " 
+                                           + goal.name.ToString()
+                                           +" Знайдений!");
+                        else
+                            MessageBox.Show("Найкоротшого шляху між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           +" не існує!");
+                        _success = value;
+                    }
+                }
+
+                public override async Task make()
+                {
+                    marks.Add(start, 0);
+                    foreach (var node in graph.nodes)
+                        if (node != start)
+                            marks.Add(node,INF);
+                    graph.highlightNode(start);
+                    
+                    
                 }
             }
 

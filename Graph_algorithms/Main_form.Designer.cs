@@ -176,6 +176,7 @@
             this.Bell_Ford_algToolStripMenuItem.Name = "Bell_Ford_algToolStripMenuItem";
             this.Bell_Ford_algToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.Bell_Ford_algToolStripMenuItem.Text = "Алгоритм Беллмана-Форда";
+            this.Bell_Ford_algToolStripMenuItem.Click += new System.EventHandler(this.Bell_Ford_algToolStripMenuItem_Click);
             // 
             // Floyd_Warsh_algToolStripMenuItem
             // 
@@ -188,6 +189,7 @@
             this.DijkstrasAlgToolStripMenuItem.Name = "DijkstrasAlgToolStripMenuItem";
             this.DijkstrasAlgToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.DijkstrasAlgToolStripMenuItem.Text = "Алгоритм Дейкстри";
+            this.DijkstrasAlgToolStripMenuItem.Click += new System.EventHandler(this.DijkstrasAlgToolStripMenuItem_Click);
             // 
             // JohnsonsAlgToolStripMenuItem
             // 

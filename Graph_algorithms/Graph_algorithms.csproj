@@ -80,6 +80,12 @@
     <Compile Include="Main_form.Designer.cs">
       <DependentUpon>Main_form.cs</DependentUpon>
     </Compile>
+    <Compile Include="MinRoutesForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MinRoutesForm.Designer.cs">
+      <DependentUpon>MinRoutesForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Render.cs" />
@@ -91,6 +97,9 @@
     </Compile>
     <EmbeddedResource Include="Main_form.resx">
       <DependentUpon>Main_form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MinRoutesForm.resx">
+      <DependentUpon>MinRoutesForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>

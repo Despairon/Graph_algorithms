@@ -12,6 +12,7 @@ namespace Graph_algorithms
         }
         private bool switcher = false;
         private SearchAlg_Form searchAlg_form;
+        private MinRoutesForm minRoutesForm;
         public Graph graph;
         public static double weight { get; private set; }
         
@@ -113,6 +114,17 @@ namespace Graph_algorithms
         private void PrimsAlgToolStripMenuItem_Click(object sender, EventArgs e)
         {
             graph.doAlgorithm(new Graph.Algorithm.Prim(graph));
+        }
+
+        private void Bell_Ford_algToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void DijkstrasAlgToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            minRoutesForm = new MinRoutesForm(this, (int)algorithms.DIJKSTRAS);
+            minRoutesForm.ShowDialog();
         }
     }
 }
