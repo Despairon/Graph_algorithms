@@ -8,6 +8,7 @@ using System.Windows.Forms;
 
 namespace Graph_algorithms
 {
+    public enum colors { RED, GREEN, BLUE }
     class Render
     {
         public Render(ref SimpleOpenGlControl openGL)
@@ -75,13 +76,17 @@ namespace Graph_algorithms
             {
                 text = i.ToString();
                 i++;
+                color = (int)colors.GREEN;
             }
-            public Text(int x, int y,string text) : base(x, y)
+
+            public Text(int x, int y,string text, int color) : base(x, y)
             {
                 this.text = text;
+                this.color = color;
             }
             private string text;
             private static int i = 1;
+            private int color;
 
             public static void clear()
             {
@@ -90,12 +95,25 @@ namespace Graph_algorithms
 
             public override void draw()
             {
+                IntPtr font = Glut.GLUT_BITMAP_9_BY_15;
                 Gl.glLoadIdentity();
                 Gl.glPushMatrix();
                 Gl.glTranslated(0, 0, 1);
-                Gl.glColor3f(0.0f, 1.0f, 0.0f);
+                switch (color)
+                {
+                    case (int)colors.RED:
+                        Gl.glColor3f(1.0f, 0.0f, 0.0f);
+                        font = Glut.GLUT_BITMAP_HELVETICA_18;
+                        break;
+                    case (int)colors.GREEN:
+                        Gl.glColor3f(0.0f, 1.0f, 0.0f);
+                        break;
+                    case (int)colors.BLUE:
+                        Gl.glColor3f(0.0f, 0.0f, 1.0f);
+                        break;
+                }
                 Gl.glRasterPos2d(x - 8, y + 5);
-                Glut.glutBitmapString(Glut.GLUT_BITMAP_HELVETICA_18, text);
+                Glut.glutBitmapString(font, text);
                 Gl.glPopMatrix();
             }
         }
@@ -199,7 +217,17 @@ namespace Graph_algorithms
 
         private void addText(int x, int y, string text)
         {
-            geometrics.Add(new Text(x, y, text));
+            geometrics.Add(new Text(x, y, text,(int)colors.RED));
+        }
+
+        public void addText(int x, int y, string text, int color)
+        {
+            geometrics.Add(new Text(x, y, text, color));
+        }
+
+        public void removeText(int x, int y)
+        {
+            geometrics.Remove(geometrics.Find(txt => txt.x == x && txt.y == y));
         }
 
         public void addNodeHighlight()
@@ -219,14 +247,14 @@ namespace Graph_algorithms
         public void addArc(int x, int y, int x1, int y1, string text)
         {
             geometrics.Add(new Arc(x,y,x1,y1));
-            geometrics.Add(new Text((x + x1)/2,(y + y1)/2,text));
+            addText( (x + x1) / 2, (y + y1) / 2, text );
         }
 
         public void addCircle(int x, int y)
         {
             Rectangle edges = new Rectangle(x - 15, y - 15, 30, 30);
             geometrics.Add(new Circle(x, y, edges));
-            geometrics.Add(new Text(x, y));
+            addText(x, y);
         }
 
         public void clearAllHighlights()

@@ -292,11 +292,13 @@ namespace Graph_algorithms
                     this.start = start;
                     this.goal = goal;
                     marks = new Dictionary<Node, double>();
+                    opened = new List<Node>();
                 }
                 const int INF = 1000000000;
                 Node start;
                 Node goal;
                 Dictionary<Node, double> marks;
+                List<Node> opened;
 
                 protected override bool success
                 {
@@ -305,29 +307,88 @@ namespace Graph_algorithms
                     set
                     {
                         if (value)
+                        {
+                            double road = marks.FirstOrDefault(pair => pair.Key == goal).Value;
                             MessageBox.Show("Найкоротший шлях між "
-                                           + start.name.ToString() +" та " 
+                                           + start.name.ToString() + " та "
                                            + goal.name.ToString()
-                                           +" Знайдений!");
+                                           + " = "
+                                           + road.ToString());
+                        }
                         else
                             MessageBox.Show("Найкоротшого шляху між "
                                            + start.name.ToString() + " та "
                                            + goal.name.ToString()
-                                           +" не існує!");
+                                           + " не існує!");
                         _success = value;
                     }
                 }
 
                 public override async Task make()
                 {
-                    marks.Add(start, 0);
-                    foreach (var node in graph.nodes)
-                        if (node != start)
-                            marks.Add(node,INF);
-                    graph.highlightNode(start);
-                    
-                    
+                    try
+                    {
+                        marks.Add(start, 0);
+                        var currMark = marks.First();
+                        graph.changeMark(start.x, start.y, "0");
+                        foreach (var node in graph.nodes)
+                            if (node != start)
+                            {
+                                marks.Add(node, INF);
+                                graph.changeMark(node.x, node.y, "INF");
+                            }
+                        graph.highlightNode(start);
+                        while (opened.Count != graph.nodes.Count)
+                        {
+                            opened.Add(currMark.Key);
+                            foreach (var arc in currMark.Key.connections.OrderBy(arc => arc.Value))
+                            {
+                                if (!opened.Contains(arc.Key))
+                                {
+                                    var possibleNode = marks.FirstOrDefault(pair => pair.Key == arc.Key);
+                                    if ((arc.Value + currMark.Value) < possibleNode.Value)
+                                    {
+                                        marks[possibleNode.Key] = arc.Value + currMark.Value;
+                                        await Task.Delay(1000);
+                                        graph.highlightArc(currMark.Key.x, currMark.Key.y, possibleNode.Key.x, possibleNode.Key.y);
+                                        graph.changeMark(possibleNode.Key.x, possibleNode.Key.y, marks[possibleNode.Key].ToString());
+                                    }
+                                }
+                            }
+                            currMark = min();
+                            await Task.Delay(1000);
+                            graph.highlightNode(currMark.Key);
+                        }
+                        success = true;
+                    }
+                    catch (Exception)
+                    {
+                        success = false;
+                    }
                 }
+
+                private KeyValuePair<Node,double> min()
+                {
+                    KeyValuePair<Node, double> min = max();
+                    foreach (var mark in marks)
+                    {
+                        if ((mark.Value < min.Value) && !(opened.Contains(mark.Key)))       
+                            min = mark;
+                    }
+                    return min;
+                }
+
+                private KeyValuePair<Node,double> max()
+                {
+                    KeyValuePair<Node, double> max = marks.First();
+                    foreach (var mark in marks)
+                    {
+                        if ((mark.Value > max.Value) && !(opened.Contains(mark.Key)))
+                            max = mark;
+                    }
+                    return max;
+                }
+
             }
 
             public Algorithm(Graph graph)
@@ -356,6 +417,12 @@ namespace Graph_algorithms
         public void deleteHighlights()
         {
             render.clearAllHighlights();
+        }
+
+        public void changeMark(int x, int y, string text)
+        {
+            render.removeText(x, y-20);
+            render.addText(x,y-20,text,(int)colors.BLUE);
         }
 
         public void addNode(int x, int y)
