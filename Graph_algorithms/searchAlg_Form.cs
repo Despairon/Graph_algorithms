@@ -14,10 +14,10 @@ namespace Graph_algorithms
             main_form = parent;
             this.algorithm = algorithm;
         }
-        Graph.Node start;
-        Graph.Node goal;
-        Main_form main_form;
-        int algorithm;
+        private Graph.Node start;
+        private Graph.Node goal;
+        private Main_form main_form;
+        private int algorithm;
 
         private void button1_Click(object sender, EventArgs e)
         {

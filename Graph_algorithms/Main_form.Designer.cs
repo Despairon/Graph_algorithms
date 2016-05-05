@@ -183,6 +183,7 @@
             this.Floyd_Warsh_algToolStripMenuItem.Name = "Floyd_Warsh_algToolStripMenuItem";
             this.Floyd_Warsh_algToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.Floyd_Warsh_algToolStripMenuItem.Text = "Алгоритм Флойда-Варшала";
+            this.Floyd_Warsh_algToolStripMenuItem.Click += new System.EventHandler(this.Floyd_Warsh_algToolStripMenuItem_Click);
             // 
             // DijkstrasAlgToolStripMenuItem
             // 

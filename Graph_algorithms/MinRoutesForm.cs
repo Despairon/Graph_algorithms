@@ -13,10 +13,10 @@ namespace Graph_algorithms
             main_form = parent;
             this.algorithm = algorithm;
         }
-        Graph.Node start;
-        Graph.Node goal;
-        Main_form main_form;
-        int algorithm;
+        private Graph.Node start;
+        private Graph.Node goal;
+        private Main_form main_form;
+        private int algorithm;
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -36,6 +36,9 @@ namespace Graph_algorithms
                 {
                     case (int)algorithms.DIJKSTRAS:
                         main_form.graph.doAlgorithm(new Graph.Algorithm.Dijkstras(main_form.graph, start, goal));
+                        break;
+                    case (int)algorithms.FLOYD_WARSH:
+                        main_form.graph.doAlgorithm(new Graph.Algorithm.Floyd_Warsh(main_form.graph, start, goal));
                         break;
                 }
             }

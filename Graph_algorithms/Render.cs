@@ -86,7 +86,7 @@ namespace Graph_algorithms
             }
             private string text;
             private static int i = 1;
-            private int color;
+            public int color { get; }
 
             public static void clear()
             {
@@ -261,7 +261,8 @@ namespace Graph_algorithms
         {
             for (int i = 0; i < geometrics.Count; i++)
             {
-                if (geometrics[i] is NodeHighlight || geometrics[i] is ArcHighlight)
+                if (geometrics[i] is NodeHighlight || geometrics[i] is ArcHighlight
+                 || (geometrics[i] is Text && (geometrics[i] as Text).color == (int)colors.BLUE) )
                 {
                     geometrics.RemoveAt(i);
                     i--;

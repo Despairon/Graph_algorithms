@@ -8,7 +8,7 @@ using System;
 
 namespace Graph_algorithms
 {
-    enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS }
+    enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS, FLOYD_WARSH }
 
     public class Graph
     {
@@ -221,7 +221,7 @@ namespace Graph_algorithms
                     MST = new List<Node>();
                     MST.Add(graph.nodes.First());
                 }
-                List<Node> MST;
+                private List<Node> MST;
 
                 protected override bool success
                 {
@@ -294,11 +294,10 @@ namespace Graph_algorithms
                     marks = new Dictionary<Node, double>();
                     opened = new List<Node>();
                 }
-                const int INF = 1000000000;
-                Node start;
-                Node goal;
-                Dictionary<Node, double> marks;
-                List<Node> opened;
+                private Node start;
+                private Node goal;
+                private Dictionary<Node, double> marks;
+                private List<Node> opened;
 
                 protected override bool success
                 {
@@ -391,6 +390,85 @@ namespace Graph_algorithms
 
             }
 
+            public class Floyd_Warsh : Algorithm
+            {
+                public Floyd_Warsh(Graph graph, Node start, Node goal) : base (graph)
+                {
+                    this.start = start;
+                    this.goal = goal;
+                    d = new double[graph.nodes.Count, graph.nodes.Count];
+                    foreach (var node in graph.nodes)
+                        foreach (var arc in node.connections)
+                            d[node.name-1, arc.Key.name-1] = arc.Value;
+                    for (int i = 0; i < graph.nodes.Count; i++)
+                        for (int j = 0; j < graph.nodes.Count; j++)
+                            if (i != j && d[i, j] == 0)
+                                d[i, j] = INF;
+                }
+                private Node start;
+                private Node goal;
+                private double[,] d;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                        {
+                            MessageBox.Show("Найкоротший шлях між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " = "
+                                           + d[start.name,goal.name]);
+                        }
+                        else
+                            MessageBox.Show("Найкоротшого шляху між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " не існує!");
+                        _success = value;
+                    }
+                }
+
+                public override async Task make()
+                {
+                    try
+                    {
+                        int[,] next = new int[graph.nodes.Count, graph.nodes.Count];
+                        for (int i = 0; i < graph.nodes.Count; i++)
+                            for (int j = 0; j < graph.nodes.Count; j++)
+                                next[i, j] = INF;
+
+                        for (int i = 0; i < graph.nodes.Count; i++)
+                            for (int j = 0; j < graph.nodes.Count; j++)
+                                for (int k = 0; k < graph.nodes.Count; k++)
+                                    if (d[j, k] > (d[j, i] + d[i, k]))
+                                    {
+                                        d[j, k] = d[j, i] + d[i, k];
+                                        next[j,k] = i;
+                                    }
+                        if (d[start.name-1, goal.name-1] == INF)
+                            throw new Exception();
+                        else
+                            success = true;
+                       /* int c = start.name-1;
+                         while (c != goal.name-1)
+                         {
+                             await Task.Delay(1000);
+                             graph.highlightNode(graph.nodes.Find(node => node.name == c+1));
+                             c = next[c, goal.name-1];
+                         }*/
+                    }
+                    catch (Exception)
+                    {
+                        success = false;
+                    }
+                }
+
+            }
+
             public Algorithm(Graph graph)
             {
                 this.graph = graph;
@@ -398,6 +476,7 @@ namespace Graph_algorithms
             protected Graph graph;
             protected  bool _success;
             protected abstract bool success { get; set; }
+            protected const int INF = 1000000000;
 
             public abstract Task make();
         }
