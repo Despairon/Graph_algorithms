@@ -40,6 +40,9 @@ namespace Graph_algorithms
                     case (int)algorithms.FLOYD_WARSH:
                         main_form.graph.doAlgorithm(new Graph.Algorithm.Floyd_Warsh(main_form.graph, start, goal));
                         break;
+                    case (int)algorithms.BELL_FORD:
+                        main_form.graph.doAlgorithm(new Graph.Algorithm.Bell_Ford(main_form.graph, start, goal));
+                        break;
                 }
             }
             catch (FormatException)

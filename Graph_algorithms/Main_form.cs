@@ -118,7 +118,8 @@ namespace Graph_algorithms
 
         private void Bell_Ford_algToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
+            minRoutesForm = new MinRoutesForm(this, (int)algorithms.BELL_FORD);
+            minRoutesForm.ShowDialog();
         }
 
         private void DijkstrasAlgToolStripMenuItem_Click(object sender, EventArgs e)

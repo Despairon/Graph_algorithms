@@ -8,7 +8,8 @@ using System;
 
 namespace Graph_algorithms
 {
-    enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS, FLOYD_WARSH }
+    enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS, FLOYD_WARSH,
+                      BELL_FORD }
 
     public class Graph
     {
@@ -285,6 +286,62 @@ namespace Graph_algorithms
                 }
             }
 
+            public class Bell_Ford : Algorithm
+            {
+                public Bell_Ford(Graph graph, Node start, Node goal) : base (graph)
+                {
+                    this.start = start;
+                    this.goal = goal;
+                    d = new double[graph.nodes.Count];
+                }
+                Node start;
+                Node goal;
+                double[] d;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                        {
+                            MessageBox.Show("Найкоротший шлях між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " = "
+                                           + d[goal.name-1].ToString());
+                        }
+                        else
+                            MessageBox.Show("Найкоротшого шляху між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " не існує!");
+                    }
+                }
+
+                public override async Task make()
+                {
+                    try
+                    {
+                        foreach (var node in graph.nodes)
+                            d[node.name - 1] = INF;
+                        d[start.name - 1] = 0;
+                        for (int i = 1; i < graph.nodes.Count - 1; i++)
+                            foreach (var node in graph.nodes)
+                                foreach (var arc in node.connections)
+                                    if (d[arc.Key.name - 1] > d[node.name - 1] + arc.Value)
+                                        d[arc.Key.name - 1] = d[node.name - 1] + arc.Value;
+                        success = true;
+                    }
+                    catch (Exception)
+                    {
+                        success = false;
+                    }
+                }
+
+            }
+
             public class Dijkstras : Algorithm
             {
                 public Dijkstras(Graph graph, Node start, Node goal) : base (graph)
@@ -421,7 +478,7 @@ namespace Graph_algorithms
                                            + start.name.ToString() + " та "
                                            + goal.name.ToString()
                                            + " = "
-                                           + d[start.name,goal.name]);
+                                           + d[start.name-1,goal.name-1]);
                         }
                         else
                             MessageBox.Show("Найкоротшого шляху між "
@@ -447,19 +504,22 @@ namespace Graph_algorithms
                                     if (d[j, k] > (d[j, i] + d[i, k]))
                                     {
                                         d[j, k] = d[j, i] + d[i, k];
-                                        next[j,k] = i;
+                                        next[j, k] = i;
+                                        /*** почему-то оно неправильно восстанавливает путь...
+                                         *   понятия не имею что такое...
+                                        ***/
                                     }
                         if (d[start.name-1, goal.name-1] == INF)
                             throw new Exception();
                         else
                             success = true;
-                       /* int c = start.name-1;
-                         while (c != goal.name-1)
-                         {
-                             await Task.Delay(1000);
-                             graph.highlightNode(graph.nodes.Find(node => node.name == c+1));
-                             c = next[c, goal.name-1];
-                         }*/
+                        //int c = start.name-1;
+                        // while (c != goal.name-1)
+                        // {
+                        //     await Task.Delay(1000);
+                        //     graph.highlightNode(graph.nodes.Find(node => node.name == c+1));
+                        //     c = next[c, goal.name-1];
+                        // }
                     }
                     catch (Exception)
                     {
