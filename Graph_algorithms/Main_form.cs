@@ -133,5 +133,11 @@ namespace Graph_algorithms
             minRoutesForm = new MinRoutesForm(this, (int)algorithms.FLOYD_WARSH);
             minRoutesForm.ShowDialog();
         }
+
+        private void JohnsonsAlgToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            minRoutesForm = new MinRoutesForm(this, (int)algorithms.JOHNSON);
+            minRoutesForm.ShowDialog();
+        }
     }
 }

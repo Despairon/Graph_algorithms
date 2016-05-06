@@ -197,6 +197,7 @@
             this.JohnsonsAlgToolStripMenuItem.Name = "JohnsonsAlgToolStripMenuItem";
             this.JohnsonsAlgToolStripMenuItem.Size = new System.Drawing.Size(229, 22);
             this.JohnsonsAlgToolStripMenuItem.Text = "Алгоритм Джонсона";
+            this.JohnsonsAlgToolStripMenuItem.Click += new System.EventHandler(this.JohnsonsAlgToolStripMenuItem_Click);
             // 
             // максимальнийПотікToolStripMenuItem
             // 

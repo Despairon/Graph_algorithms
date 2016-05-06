@@ -9,7 +9,7 @@ using System;
 namespace Graph_algorithms
 {
     enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS, FLOYD_WARSH,
-                      BELL_FORD }
+                      BELL_FORD, JOHNSON }
 
     public class Graph
     {
@@ -294,9 +294,9 @@ namespace Graph_algorithms
                     this.goal = goal;
                     d = new double[graph.nodes.Count];
                 }
-                Node start;
-                Node goal;
-                double[] d;
+                private Node start;
+                private Node goal;
+                private double[] d;
 
                 protected override bool success
                 {
@@ -529,6 +529,154 @@ namespace Graph_algorithms
 
             }
 
+            public class Johnson : Algorithm
+            {
+                public Johnson(Graph graph, Node start, Node goal) : base(graph)
+                {
+                    this.start = start;
+                    this.goal = goal;
+                    _d = new double[graph.nodes.Count, graph.nodes.Count];
+                }
+                private Node start;
+                private Node goal;
+                private double[,] _d;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                        {
+                            MessageBox.Show("Найкоротший шлях між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " = "
+                                           + _d[start.name-1,goal.name-1]);
+                        }
+                        else
+                            MessageBox.Show("Найкоротшого шляху між "
+                                           + start.name.ToString() + " та "
+                                           + goal.name.ToString()
+                                           + " не існує!");
+                        _success = value;
+                    }
+                }
+
+                public override async Task make()
+                {
+                    int s;
+                    int[] _g;
+                    double[,] _w;
+                    double[] h;
+                    double[] dBellmanFord;
+                    double[,] dDijkstra;
+
+                    buildNewGraph(out s, out _g, out _w);
+                    h = new double[_g.Length];
+                    dDijkstra = new double[graph.nodes.Count, graph.nodes.Count];
+
+                    if (!bellman_ford(_g, _w, s, out dBellmanFord))
+                    {
+                        success = false;
+                        return;
+                    }
+
+                    Array.Copy(dBellmanFord, h, h.Length);
+
+                    for (int u = 0; u < _g.Length; u++)
+                        for (int v = 0; v < _g.Length; v++)
+                            _w[u, v] += h[u] - h[v];
+
+                    foreach (var u in graph.nodes)
+                    {
+                        dijkstra(_g, _w, u.name - 1, ref dDijkstra);
+                        foreach (var v in graph.nodes)
+                            _d[u.name - 1, v.name - 1] = dDijkstra[u.name - 1, v.name - 1] + h[v.name - 1] - h[u.name - 1];
+                    }
+
+                    success = true;
+                }
+
+                private bool bellman_ford(int[] g, double[,] w, int s, out double[] d)
+                {
+                    d = new double[g.Length];
+                    foreach (var u in g)
+                        d[u-1] = INF;
+                    d[s-1] = 0;
+                    for (int i = 1; i < d.Length - 1; i++)
+                        for (int u = 0; u < d.Length; u++)
+                            for (int v = 0; v < d.Length; v++)
+                                if (d[v] > d[u] + w[u, v])
+                                    d[v] = d[u] + w[u, v];
+                    for (int u = 0; u < d.Length; u++)
+                        for (int v = 0; v < d.Length; v++)
+                            if (d[v] > d[u] + w[u, v])
+                                return false;
+                    return true;                    
+                }
+
+                private void dijkstra(int[] g, double[,] w ,int s, ref double[,] d) // и тут может быть проблема
+                {
+                    List<int> visited = new List<int>();
+                    d[s, s] = 0;
+                    for (int u = 0; u < g.Length-1; u++)
+                        for (int v = 0; v < g.Length-1; v++)
+                            if (u != v)
+                                d[u, v] = INF;
+                    while (visited.Count != g.Length-1)  // особенно тут!
+                    {
+                        int v = min(ref g, s, d);
+                        visited.Add(v);
+                        for (int u = 0; u < g.Length-1; u++)
+                            if (!visited.Contains(u))
+                            if (d[v, u] > d[u, v] + w[v, u])
+                                d[v, u] = d[u, v] + w[v, u];
+                    }
+                }
+
+                private int min(ref int[] g, int u, double[,] d) // тут может быть проблема
+                {
+                    double _min = INF;
+                    for (int v = 0; v < g.Length-1; v++)
+                        if (d[u, v] < _min)
+                            _min = d[u, v];
+                    for (int v = 0; v < g.Length-1; v++)
+                        if (d[u, v] == _min)
+                            return v;
+                    return -1;
+                }
+
+                private void buildNewGraph(out int s, out int[] g, out double[,] w )
+                {
+                    s = graph.nodes.Last().name + 1;
+                    g = new int[graph.nodes.Count + 1];
+                    w = new double[graph.nodes.Count + 1, graph.nodes.Count + 1];
+                    int i = 0;
+                    foreach (var node in graph.nodes)
+                    {
+                        g[i] = node.name;
+                        i++;
+                    }
+                    g[i] = s;
+                    for (int j = 0; j < graph.nodes.Count; j++)
+                        for (int k = 0; k < graph.nodes.Count; k++)
+                            if (j != k)
+                                w[j, k] = INF;
+                            else
+                                w[j, k] = 0;
+                    foreach (var node in graph.nodes)
+                        foreach (var arc in node.connections)
+                            w[node.name - 1, arc.Key.name - 1] = arc.Value;
+                    foreach (var node in graph.nodes)
+                    {
+                        w[s - 1, node.name - 1] = 0;
+                        w[node.name - 1, s - 1] = 0;
+                    }
+                }
+
+            }
             public Algorithm(Graph graph)
             {
                 this.graph = graph;

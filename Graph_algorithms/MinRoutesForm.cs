@@ -43,6 +43,9 @@ namespace Graph_algorithms
                     case (int)algorithms.BELL_FORD:
                         main_form.graph.doAlgorithm(new Graph.Algorithm.Bell_Ford(main_form.graph, start, goal));
                         break;
+                    case (int)algorithms.JOHNSON:
+                        main_form.graph.doAlgorithm(new Graph.Algorithm.Johnson(main_form.graph, start, goal));
+                        break;
                 }
             }
             catch (FormatException)
