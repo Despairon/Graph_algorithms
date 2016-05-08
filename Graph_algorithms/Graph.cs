@@ -9,7 +9,7 @@ using System;
 namespace Graph_algorithms
 {
     enum algorithms { BFS, DFS, KRUSKAL, PRIM, DIJKSTRAS, FLOYD_WARSH,
-                      BELL_FORD, JOHNSON }
+                      BELL_FORD, JOHNSON, MAX_FLOW }
 
     public class Graph
     {
@@ -677,6 +677,113 @@ namespace Graph_algorithms
                 }
 
             }
+
+            /*** Алгоритм Форда-Фалкерсона(Едмондса-Карпа) ***/
+
+            public class MaxFlow : Algorithm 
+            {
+                public MaxFlow( Graph graph, Node source, Node drain) : base (graph)
+                {
+                    this.source = source;
+                    this.drain = drain;
+                    f = new double[graph.nodes.Count, graph.nodes.Count];
+                    c = new double[graph.nodes.Count, graph.nodes.Count];
+                    route = new List<KeyValuePair<int, int> >();
+                }
+                private Node source;
+                private Node drain;
+                private double[,] f;
+                private double[,] c;
+                private double maxFlow;
+                private List<KeyValuePair<int, int> > route;
+
+                protected override bool success
+                {
+                    get { return _success; }
+
+                    set
+                    {
+                        if (value)
+                        {
+                            MessageBox.Show("Максимальний потік між "
+                                           + source.name.ToString() + " та "
+                                           + drain.name.ToString()
+                                           + " = "
+                                           + maxFlow.ToString());
+                        }
+                        else
+                            MessageBox.Show("Неможливо визначити "
+                                           + "максимальний потік в графі!");
+                        _success = value;
+                    }
+                }
+
+                public override async Task make()
+                {
+                    try
+                    {
+                        foreach (var node in graph.nodes)
+                            foreach (var arc in node.connections)
+                                c[node.name - 1, arc.Key.name - 1] = arc.Value;
+                        while (minRouteBFS(source.name - 1, drain.name - 1, route))
+                        {
+                            double c = cMin(route);
+                            foreach (var arc in route)
+                            {
+                                f[arc.Key, arc.Value] += c;
+                                f[arc.Value, arc.Key] = f[arc.Key, arc.Value] * (-1.0f);
+                            }
+                        }
+                        foreach(var arc in drain.connections)
+                            maxFlow += f[arc.Key.name - 1, drain.name - 1];
+                        success = true;
+                    }
+                    catch (Exception)
+                    {
+                        success = false;
+                    }
+                }
+
+                private bool minRouteBFS(int start, int goal, List<KeyValuePair<int, int> > route)
+                {
+                    Queue<int> queue = new Queue<int>();
+                    List<int> opened = new List<int>();
+                    route.Clear();
+                    queue.Enqueue(start);
+                    int u = start;
+                    int v = start;
+                    while (u != goal)
+                    {
+                        u = queue.Dequeue();
+                        opened.Add(u);
+                        if (u == goal)
+                        {
+                            route.Add(new KeyValuePair<int, int>(v,u));
+                            return true;
+                        }
+                        else
+                            foreach (var node in graph.nodes.Find(node => node.name == u + 1).connections)
+                                if (!opened.Contains(node.Key.name - 1) && f[u, v] / c[u, v] != 1)
+                                {
+                                    queue.Enqueue(node.Key.name - 1);
+                                    route.Add(new KeyValuePair<int,int>(u,node.Key.name - 1));
+                                    v = u;
+                                }
+                    }
+                    return false;
+                }
+
+                private double cMin(List< KeyValuePair<int,int> > route)
+                {
+                    double min = c[route.First().Key,route.First().Value];
+                    foreach (var x in route)
+                        if (c[x.Key,x.Value] < min)
+                            min = c[x.Key, x.Value];
+                    return min;
+                }
+
+            }
+
             public Algorithm(Graph graph)
             {
                 this.graph = graph;

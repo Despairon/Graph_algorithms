@@ -80,6 +80,12 @@
     <Compile Include="Main_form.Designer.cs">
       <DependentUpon>Main_form.cs</DependentUpon>
     </Compile>
+    <Compile Include="MaxFlowForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="MaxFlowForm.Designer.cs">
+      <DependentUpon>MaxFlowForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="MinRoutesForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -97,6 +103,9 @@
     </Compile>
     <EmbeddedResource Include="Main_form.resx">
       <DependentUpon>Main_form.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="MaxFlowForm.resx">
+      <DependentUpon>MaxFlowForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="MinRoutesForm.resx">
       <DependentUpon>MinRoutesForm.cs</DependentUpon>

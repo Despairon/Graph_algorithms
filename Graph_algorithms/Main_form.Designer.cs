@@ -46,7 +46,6 @@
             this.DijkstrasAlgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.JohnsonsAlgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.максимальнийПотікToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.Ford_Falks_AlgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.Edm_Carp_AlgToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripTextBox1 = new System.Windows.Forms.ToolStripTextBox();
             this.tbWeight = new System.Windows.Forms.ToolStripTextBox();
@@ -202,23 +201,18 @@
             // максимальнийПотікToolStripMenuItem
             // 
             this.максимальнийПотікToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.Ford_Falks_AlgToolStripMenuItem,
             this.Edm_Carp_AlgToolStripMenuItem});
             this.максимальнийПотікToolStripMenuItem.Name = "максимальнийПотікToolStripMenuItem";
             this.максимальнийПотікToolStripMenuItem.Size = new System.Drawing.Size(135, 23);
             this.максимальнийПотікToolStripMenuItem.Text = "Максимальний потік";
             // 
-            // Ford_Falks_AlgToolStripMenuItem
-            // 
-            this.Ford_Falks_AlgToolStripMenuItem.Name = "Ford_Falks_AlgToolStripMenuItem";
-            this.Ford_Falks_AlgToolStripMenuItem.Size = new System.Drawing.Size(239, 22);
-            this.Ford_Falks_AlgToolStripMenuItem.Text = "Алгоритм Форда-Фалкерсона";
-            // 
             // Edm_Carp_AlgToolStripMenuItem
             // 
             this.Edm_Carp_AlgToolStripMenuItem.Name = "Edm_Carp_AlgToolStripMenuItem";
             this.Edm_Carp_AlgToolStripMenuItem.Size = new System.Drawing.Size(239, 22);
-            this.Edm_Carp_AlgToolStripMenuItem.Text = "Алгоритм Едмондса-Карпа";
+            this.Edm_Carp_AlgToolStripMenuItem.Text = "Алгоритм Форда-Фалкерсона";
+            this.Edm_Carp_AlgToolStripMenuItem.ToolTipText = "(Едмондса-Карпа)";
+            this.Edm_Carp_AlgToolStripMenuItem.Click += new System.EventHandler(this.Edm_Carp_AlgToolStripMenuItem_Click);
             // 
             // toolStripTextBox1
             // 
@@ -286,7 +280,6 @@
         private System.Windows.Forms.ToolStripMenuItem DijkstrasAlgToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem JohnsonsAlgToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem максимальнийПотікToolStripMenuItem;
-        private System.Windows.Forms.ToolStripMenuItem Ford_Falks_AlgToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem Edm_Carp_AlgToolStripMenuItem;
         private System.Windows.Forms.ToolStripTextBox toolStripTextBox1;
         private System.Windows.Forms.ToolStripTextBox tbWeight;

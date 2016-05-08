@@ -13,6 +13,7 @@ namespace Graph_algorithms
         private bool switcher = false;
         private SearchAlg_Form searchAlg_form;
         private MinRoutesForm minRoutesForm;
+        private MaxFlowForm maxFlowForm;
         public Graph graph;
         public static double weight { get; private set; }
         
@@ -138,6 +139,12 @@ namespace Graph_algorithms
         {
             minRoutesForm = new MinRoutesForm(this, (int)algorithms.JOHNSON);
             minRoutesForm.ShowDialog();
+        }
+
+        private void Edm_Carp_AlgToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            maxFlowForm = new MaxFlowForm(this);
+            maxFlowForm.ShowDialog();
         }
     }
 }
