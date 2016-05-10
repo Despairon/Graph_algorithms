@@ -688,14 +688,18 @@ namespace Graph_algorithms
                     this.drain = drain;
                     f = new double[graph.nodes.Count, graph.nodes.Count];
                     c = new double[graph.nodes.Count, graph.nodes.Count];
-                    route = new List<KeyValuePair<int, int> >();
+                    h = new double[graph.nodes.Count];
+                    prev = new int[graph.nodes.Count];
+                    maxFlow = 0;
                 }
+
                 private Node source;
                 private Node drain;
                 private double[,] f;
                 private double[,] c;
+                private double[] h;
                 private double maxFlow;
-                private List<KeyValuePair<int, int> > route;
+                private int[] prev;
 
                 protected override bool success
                 {
@@ -722,20 +726,50 @@ namespace Graph_algorithms
                 {
                     try
                     {
+                        for (int i = 0; i < graph.nodes.Count; i++)
+                            for (int j = 0; j < graph.nodes.Count; j++)
+                            {
+                                c[i, j] = INF;
+                                c[j, i] = INF;
+                            }
                         foreach (var node in graph.nodes)
                             foreach (var arc in node.connections)
-                                c[node.name - 1, arc.Key.name - 1] = arc.Value;
-                        while (minRouteBFS(source.name - 1, drain.name - 1, route))
-                        {
-                            double c = cMin(route);
-                            foreach (var arc in route)
                             {
-                                f[arc.Key, arc.Value] += c;
-                                f[arc.Value, arc.Key] = f[arc.Key, arc.Value] * (-1.0f);
+                                c[node.name - 1, arc.Key.name - 1] = arc.Value;
+                                c[arc.Key.name - 1, node.name - 1] = 0;
+                            }
+                        do
+                        {
+                            findAugmentingPath();
+                            if (h[drain.name - 1] < INF)
+                            {
+                                maxFlow += h[drain.name - 1];
+                                int v = drain.name - 1;
+                                while (v != source.name - 1)
+                                {
+                                    if (prev[v] > 0)
+                                    {
+                                        await Task.Delay(1000);
+                                        graph.highlightNode(graph.nodes.Find(n => n.name == prev[v] + 1));
+                                        await Task.Delay(1000);
+                                        graph.highlightArc(graph.nodes.Find(n => n.name == prev[v] + 1).x,
+                                                           graph.nodes.Find(n => n.name == prev[v] + 1).y,
+                                                           graph.nodes.Find(n => n.name == v + 1).x,
+                                                           graph.nodes.Find(n => n.name == v + 1).y);
+                                        graph.highlightNode(graph.nodes.Find(n => n.name == v + 1));
+
+                                    }
+                                    int w = prev[v];
+                                    if (c[v, w] > 0)
+                                        f[v, w] += h[drain.name - 1];
+                                    else
+                                        f[v, w] -= h[drain.name - 1];
+                                    v = w;
+                                }
                             }
                         }
-                        foreach(var arc in drain.connections)
-                            maxFlow += f[arc.Key.name - 1, drain.name - 1];
+                        while (h[drain.name - 1] != INF);
+
                         success = true;
                     }
                     catch (Exception)
@@ -744,44 +778,46 @@ namespace Graph_algorithms
                     }
                 }
 
-                private bool minRouteBFS(int start, int goal, List<KeyValuePair<int, int> > route)
+                private void findAugmentingPath()
                 {
+                    int start = source.name - 1;
+                    int goal = drain.name - 1;
+                    foreach (var node in graph.nodes)
+                        h[node.name - 1] = INF;
                     Queue<int> queue = new Queue<int>();
-                    List<int> opened = new List<int>();
-                    route.Clear();
                     queue.Enqueue(start);
-                    int u = start;
-                    int v = start;
-                    while (u != goal)
+                    prev[start] = -1;
+                    while ( (h[goal] == INF) && (queue.Count != 0) )
                     {
-                        u = queue.Dequeue();
-                        opened.Add(u);
-                        if (u == goal)
-                        {
-                            route.Add(new KeyValuePair<int, int>(v,u));
-                            return true;
-                        }
-                        else
-                            foreach (var node in graph.nodes.Find(node => node.name == u + 1).connections)
-                                if (!opened.Contains(node.Key.name - 1) && f[u, v] / c[u, v] != 1)
-                                {
-                                    queue.Enqueue(node.Key.name - 1);
-                                    route.Add(new KeyValuePair<int,int>(u,node.Key.name - 1));
-                                    v = u;
-                                }
+                        int w = queue.Dequeue();
+                        foreach (var node in graph.nodes)
+                            if (h[node.name - 1] == INF)
+                            {
+                                if (c[w, node.name - 1] > 0)
+                                    if (c[w, node.name - 1] > f[w, node.name - 1])
+                                    {
+                                        h[node.name - 1] = min(h[w], c[w, node.name - 1] - f[w, node.name - 1]);
+                                        prev[node.name - 1] = w;
+                                        queue.Enqueue(node.name - 1);
+                                    }
+                                if (c[w, node.name - 1] < 0)
+                                    if (f[w, node.name - 1] > 0)
+                                    {
+                                        h[node.name - 1] = min(h[w], f[w, node.name - 1]);
+                                        prev[node.name - 1] = w;
+                                        queue.Enqueue(node.name - 1);
+                                    }
+                            }
                     }
-                    return false;
                 }
 
-                private double cMin(List< KeyValuePair<int,int> > route)
+                private double min(double a, double b)
                 {
-                    double min = c[route.First().Key,route.First().Value];
-                    foreach (var x in route)
-                        if (c[x.Key,x.Value] < min)
-                            min = c[x.Key, x.Value];
-                    return min;
+                    if (a < b)
+                        return a;
+                    else
+                        return b;
                 }
-
             }
 
             public Algorithm(Graph graph)
