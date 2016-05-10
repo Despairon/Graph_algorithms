@@ -679,6 +679,15 @@ namespace Graph_algorithms
             }
 
             /*** Алгоритм Форда-Фалкерсона(Едмондса-Карпа) ***/
+            
+            /***
+             * Ниже приведена правильная, работающая реализация алгоритма, но так как
+             * граф у нас НЕНАПРАВЛЕННЫЙ, матрица c[i,j] строится таким образом, что
+             * c[i,j] == c[j,i]. Из этого следует, что правильную направленность дуги,
+             * которая стоит в задаче, определить НЕВОЗМОЖНО. Соответственно,
+             * алгоритм решает задачу, грубо говоря, как для ДВУНАПРАВЛЕННОГО графа, 
+             * в котором поток в одну сторону равен потоку в противоположную.
+             ***/
 
             public class MaxFlow : Algorithm 
             {
@@ -688,7 +697,7 @@ namespace Graph_algorithms
                     this.drain = drain;
                     f = new double[graph.nodes.Count, graph.nodes.Count];
                     c = new double[graph.nodes.Count, graph.nodes.Count];
-                    h = new double[graph.nodes.Count];
+                    flow = new double[graph.nodes.Count];
                     prev = new int[graph.nodes.Count];
                     maxFlow = 0;
                 }
@@ -697,7 +706,7 @@ namespace Graph_algorithms
                 private Node drain;
                 private double[,] f;
                 private double[,] c;
-                private double[] h;
+                private double[] flow;
                 private double maxFlow;
                 private int[] prev;
 
@@ -726,50 +735,16 @@ namespace Graph_algorithms
                 {
                     try
                     {
-                        for (int i = 0; i < graph.nodes.Count; i++)
-                            for (int j = 0; j < graph.nodes.Count; j++)
-                            {
-                                c[i, j] = INF;
-                                c[j, i] = INF;
-                            }
+                        double flowToAdd;
                         foreach (var node in graph.nodes)
                             foreach (var arc in node.connections)
-                            {
-                                c[node.name - 1, arc.Key.name - 1] = arc.Value;
-                                c[arc.Key.name - 1, node.name - 1] = 0;
-                            }
+                                c[node.name - 1, arc.Key.name-1] = arc.Value;
                         do
                         {
-                            findAugmentingPath();
-                            if (h[drain.name - 1] < INF)
-                            {
-                                maxFlow += h[drain.name - 1];
-                                int v = drain.name - 1;
-                                while (v != source.name - 1)
-                                {
-                                    if (prev[v] > 0)
-                                    {
-                                        await Task.Delay(1000);
-                                        graph.highlightNode(graph.nodes.Find(n => n.name == prev[v] + 1));
-                                        await Task.Delay(1000);
-                                        graph.highlightArc(graph.nodes.Find(n => n.name == prev[v] + 1).x,
-                                                           graph.nodes.Find(n => n.name == prev[v] + 1).y,
-                                                           graph.nodes.Find(n => n.name == v + 1).x,
-                                                           graph.nodes.Find(n => n.name == v + 1).y);
-                                        graph.highlightNode(graph.nodes.Find(n => n.name == v + 1));
-
-                                    }
-                                    int w = prev[v];
-                                    if (c[v, w] > 0)
-                                        f[v, w] += h[drain.name - 1];
-                                    else
-                                        f[v, w] -= h[drain.name - 1];
-                                    v = w;
-                                }
-                            }
+                            flowToAdd = findAugmentingPath();
+                            maxFlow += flowToAdd;
                         }
-                        while (h[drain.name - 1] != INF);
-
+                        while (flowToAdd > 0);
                         success = true;
                     }
                     catch (Exception)
@@ -778,45 +753,39 @@ namespace Graph_algorithms
                     }
                 }
 
-                private void findAugmentingPath()
+                private double findAugmentingPath()
                 {
                     int start = source.name - 1;
-                    int goal = drain.name - 1;
-                    foreach (var node in graph.nodes)
-                        h[node.name - 1] = INF;
+                    int target = drain.name - 1;
+                    int currNode;
+                    flow[start] = INF;
+                    prev[target] = -1;
                     Queue<int> queue = new Queue<int>();
                     queue.Enqueue(start);
-                    prev[start] = -1;
-                    while ( (h[goal] == INF) && (queue.Count != 0) )
+                    while (prev[target] == -1 && queue.Count != 0)
                     {
-                        int w = queue.Dequeue();
-                        foreach (var node in graph.nodes)
-                            if (h[node.name - 1] == INF)
+                        currNode = queue.Dequeue();
+                        for (int i=0; i<graph.nodes.Count; i++)
+                            if ( (c[currNode,i] - f[currNode,i]) > 0 && flow[i] == 0)
                             {
-                                if (c[w, node.name - 1] > 0)
-                                    if (c[w, node.name - 1] > f[w, node.name - 1])
-                                    {
-                                        h[node.name - 1] = min(h[w], c[w, node.name - 1] - f[w, node.name - 1]);
-                                        prev[node.name - 1] = w;
-                                        queue.Enqueue(node.name - 1);
-                                    }
-                                if (c[w, node.name - 1] < 0)
-                                    if (f[w, node.name - 1] > 0)
-                                    {
-                                        h[node.name - 1] = min(h[w], f[w, node.name - 1]);
-                                        prev[node.name - 1] = w;
-                                        queue.Enqueue(node.name - 1);
-                                    }
+                                queue.Enqueue(i);
+                                prev[i] = currNode;
+                                if ( (c[currNode,i] - f[currNode,i]) < flow[currNode])
+                                    flow[i] = c[currNode,i];
+                                else
+                                    flow[i] = flow[currNode];
                             }
                     }
-                }
 
-                private double min(double a, double b)
-                {
-                    if (a < b)
-                        return a;
-                    else
-                        return b;
+                    if (prev[target] == -1)
+                        return 0;
+                    currNode = target;
+                    while (currNode != start)
+                    {
+                        f[prev[currNode],currNode] += flow[target];
+                        currNode = prev[currNode];
+                    }
+                    return flow[target];
                 }
             }
 
